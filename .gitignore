@@ -36,3 +36,5 @@ content/.obsidian/
 # Profiling
 prof/
 *.0x/
+
+/content/templates/
