@@ -7,4 +7,3 @@ enableToc: false
 comments: false
 ---
 Добро пожаловать. Это стартовая страница блога.
-![[cotik.png]]
