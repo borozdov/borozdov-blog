@@ -1,6 +1,10 @@
 ---
 title: Borozdov Blog
+description: Borozdov Blog
+draft: false
+lang: ru-RU
+enableToc: false
+comments: false
 ---
-# Borozdov Blog
-
 Добро пожаловать. Это стартовая страница блога.
+![[cotik.png]]
