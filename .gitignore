@@ -1,0 +1,38 @@
+# Dependencies
+node_modules/
+
+# Build output
+public/
+.quartz-cache/
+
+# Logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# System files
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Editor / IDE
+.vscode/
+.idea/
+.claude/
+*.swp
+*.swo
+*~
+
+# Obsidian vault internals
+content/.obsidian/
+
+# Env / secrets
+.env
+.env.*
+!.env.example
+
+# Profiling
+prof/
+*.0x/
