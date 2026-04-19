@@ -1,0 +1,9 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "borozdov-blog",
+  "compatibility_date": "2025-04-19",
+  "assets": {
+    "directory": "./public",
+    "not_found_handling": "404-page"
+  }
+}
