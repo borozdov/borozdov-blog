@@ -16,7 +16,7 @@ const config: QuartzConfig = {
       provider: "plausible",
     },
     locale: "ru-RU",
-    baseUrl: "rymtnrwtq.github.io/test-content",
+    baseUrl: "blog.borozdov.ru",
     ignorePatterns: ["private", "templates", ".templates", ".attachments", ".obsidian"],
     defaultDateType: "modified",
     theme: {
