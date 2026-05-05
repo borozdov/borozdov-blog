@@ -86,6 +86,7 @@ export default (() => {
         <meta name="description" content={description} />
         <meta name="generator" content="Quartz" />
         <meta name="google-site-verification" content="qOwWmdq24kGcVTyxc1GL2W8TxQk63Z5lBH3NSv4hH4s" />
+        <meta name="yandex-verification" content="80f947e774535d84" />
 
         {/* Yandex.Metrika counter */}
         <script type="text/javascript" dangerouslySetInnerHTML={{ __html: `
