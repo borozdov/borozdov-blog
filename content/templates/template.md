@@ -1,33 +1,21 @@
 ---
 title: "{{title}}"
 description: ""
+socialDescription: ""
 draft: false
-tags:
-  - blog
-  - note
-  - article
-  - idea
-  - guide
-  - howto
-  - project
-  - research
-  - review
-  - opinion
-  - personal
-  - business
-  - marketing
-  - sales
-  - product
-  - startup
-  - management
-  - strategy
-  - automation
-  - ai
-  - coding
-  - tools
-  - obsidian
-  - quartz
+publish: true
+tags: []
 aliases: []
+permalink: ""
+created: ""
+modified: ""
+published: ""
+lang: "ru-RU"
+enableToc: true
+cssclasses: []
+socialImage: ""
+comments: true
+telegram_discussion: ""
 ---
 
 # {{title}}
