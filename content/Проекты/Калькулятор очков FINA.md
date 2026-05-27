@@ -5,7 +5,7 @@ socialDescription: ""
 draft: false
 tags: []
 aliases: []
-permalink: fina-point
+permalink: /Проекты/fina-point
 lang: ru-RU
 enableToc: true
 cssclasses: []
