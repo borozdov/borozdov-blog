@@ -26,20 +26,27 @@ const headerRegex = new RegExp(/h[1-6]/)
 export function pageResources(
   baseDir: FullSlug | RelativeURL,
   staticResources: StaticResources,
+  cacheBustId?: string,
 ): StaticResources {
-  const contentIndexPath = joinSegments(baseDir, "static/contentIndex.json")
-  const contentIndexScript = `const fetchData = fetch("${contentIndexPath}").then(data => data.json())`
+  const cacheBust = (resource: string) => {
+    if (!cacheBustId) return resource
+    const separator = resource.includes("?") ? "&" : "?"
+    return `${resource}${separator}v=${encodeURIComponent(cacheBustId)}`
+  }
+
+  const contentIndexPath = cacheBust(joinSegments(baseDir, "static/contentIndex.json"))
+  const contentIndexScript = `const fetchData = fetch("${contentIndexPath}", { cache: "no-store" }).then(data => data.json())`
 
   const resources: StaticResources = {
     css: [
       {
-        content: joinSegments(baseDir, "index.css"),
+        content: cacheBust(joinSegments(baseDir, "index.css")),
       },
       ...staticResources.css,
     ],
     js: [
       {
-        src: joinSegments(baseDir, "prescript.js"),
+        src: cacheBust(joinSegments(baseDir, "prescript.js")),
         loadTime: "beforeDOMReady",
         contentType: "external",
       },
@@ -55,7 +62,7 @@ export function pageResources(
   }
 
   resources.js.push({
-    src: joinSegments(baseDir, "postscript.js"),
+    src: cacheBust(joinSegments(baseDir, "postscript.js")),
     loadTime: "afterDOMReady",
     moduleType: "module",
     contentType: "external",

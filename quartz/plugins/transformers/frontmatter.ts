@@ -3,7 +3,15 @@ import remarkFrontmatter from "remark-frontmatter"
 import { QuartzTransformerPlugin } from "../types"
 import yaml from "js-yaml"
 import toml from "toml"
-import { FilePath, FullSlug, getFileExtension, slugifyFilePath, slugTag } from "../../util/path"
+import {
+  FilePath,
+  FullSlug,
+  getFileExtension,
+  joinSegments,
+  slugifyFilePath,
+  slugTag,
+  stripSlashes,
+} from "../../util/path"
 import { QuartzPluginData } from "../vfile"
 import { i18n } from "../../i18n"
 
@@ -52,6 +60,40 @@ function getAliasSlugs(aliases: string[]): FullSlug[] {
   return res
 }
 
+function normalizePermalink(permalink: string, currentSlug: FullSlug): FullSlug {
+  let permalinkPath = permalink.trim()
+  let isAbsolutePermalink = permalinkPath.startsWith("/")
+
+  try {
+    const url = new URL(permalinkPath)
+    permalinkPath = url.pathname
+    isAbsolutePermalink = true
+  } catch {}
+
+  const hasTrailingSlash = permalinkPath.endsWith("/")
+  try {
+    permalinkPath = decodeURI(permalinkPath)
+  } catch {}
+
+  permalinkPath = stripSlashes(permalinkPath.split(/[?#]/, 1)[0])
+  if (!isAbsolutePermalink) {
+    permalinkPath = joinSegments(...currentSlug.split("/").slice(0, -1), permalinkPath)
+  }
+
+  if (permalinkPath === "") {
+    return "index" as FullSlug
+  }
+
+  if (hasTrailingSlash && permalinkPath !== "index" && !permalinkPath.endsWith("/index")) {
+    permalinkPath = joinSegments(permalinkPath, "index")
+  }
+
+  const extension = getFileExtension(permalinkPath)
+  const mockFp = [".md", ".html"].includes(extension ?? "") ? permalinkPath : `${permalinkPath}.md`
+
+  return slugifyFilePath(mockFp as FilePath)
+}
+
 export const FrontMatter: QuartzTransformerPlugin<Partial<Options>> = (userOpts) => {
   const opts = { ...defaultOptions, ...userOpts }
   return {
@@ -88,11 +130,26 @@ export const FrontMatter: QuartzTransformerPlugin<Partial<Options>> = (userOpts)
             }
 
             if (data.permalink != null && data.permalink.toString() !== "") {
-              data.permalink = data.permalink.toString() as FullSlug
+              const originalSlug = file.data.slug!
+              const permalinkSlug = normalizePermalink(data.permalink.toString(), originalSlug)
+              data.permalink = permalinkSlug
+
               const aliases = file.data.aliases ?? []
-              aliases.push(data.permalink)
-              file.data.aliases = aliases
-              allSlugs.push(data.permalink)
+              if (permalinkSlug !== originalSlug) {
+                aliases.push(originalSlug)
+                file.data.slug = permalinkSlug
+              }
+
+              file.data.aliases = [...new Set(aliases.filter((alias) => alias !== file.data.slug))]
+
+              const originalSlugIndex = allSlugs.indexOf(originalSlug)
+              if (originalSlugIndex !== -1) {
+                allSlugs[originalSlugIndex] = permalinkSlug
+              } else {
+                allSlugs.push(permalinkSlug)
+              }
+
+              allSlugs.push(...file.data.aliases)
             }
 
             const cssclasses = coerceToArray(coalesceAliases(data, ["cssclasses", "cssclass"]))
@@ -152,6 +209,7 @@ declare module "vfile" {
         cssclasses: string[]
         socialImage: string
         comments: boolean | string
+        permalink: string
       }>
   }
 }
