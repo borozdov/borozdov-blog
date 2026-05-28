@@ -5,6 +5,12 @@ import { googleFontHref, googleFontSubsetHref } from "../util/theme"
 import { QuartzComponent, QuartzComponentConstructor, QuartzComponentProps } from "./types"
 import { unescapeHTML } from "../util/escape"
 import { CustomOgImagesEmitterName } from "../plugins/emitters/ogImage"
+
+function nonEmptyString(value: unknown): string | undefined {
+  const text = typeof value === "string" ? value.trim() : undefined
+  return text ? text : undefined
+}
+
 export default (() => {
   const Head: QuartzComponent = ({
     cfg,
@@ -16,8 +22,8 @@ export default (() => {
     const title =
       (fileData.frontmatter?.title ?? i18n(cfg.locale).propertyDefaults.title) + titleSuffix
     const description =
-      fileData.frontmatter?.socialDescription ??
-      fileData.frontmatter?.description ??
+      nonEmptyString(fileData.frontmatter?.socialDescription) ??
+      nonEmptyString(fileData.frontmatter?.description) ??
       unescapeHTML(fileData.description?.trim() ?? i18n(cfg.locale).propertyDefaults.description)
 
     const { css, js, additionalHead } = externalResources
@@ -69,7 +75,7 @@ export default (() => {
             <meta name="twitter:image" content={ogImageDefaultPath} />
             <meta
               property="og:image:type"
-              content={`image/${getFileExtension(ogImageDefaultPath) ?? "png"}`}
+              content={`image/${getFileExtension(ogImageDefaultPath)?.slice(1) ?? "png"}`}
             />
           </>
         )}
@@ -85,11 +91,17 @@ export default (() => {
         <link rel="icon" href={iconPath} />
         <meta name="description" content={description} />
         <meta name="generator" content="Quartz" />
-        <meta name="google-site-verification" content="qOwWmdq24kGcVTyxc1GL2W8TxQk63Z5lBH3NSv4hH4s" />
+        <meta
+          name="google-site-verification"
+          content="qOwWmdq24kGcVTyxc1GL2W8TxQk63Z5lBH3NSv4hH4s"
+        />
         <meta name="yandex-verification" content="80f947e774535d84" />
 
         {/* Yandex.Metrika counter */}
-        <script type="text/javascript" dangerouslySetInnerHTML={{ __html: `
+        <script
+          type="text/javascript"
+          dangerouslySetInnerHTML={{
+            __html: `
           (function(m,e,t,r,i,k,a){
             m[i]=m[i]||function(){(m[i].a=m[i].a||[]).push(arguments)};
             m[i].l=1*new Date();
@@ -97,8 +109,18 @@ export default (() => {
             k=e.createElement(t),a=e.getElementsByTagName(t)[0],k.async=1,k.src=r,a.parentNode.insertBefore(k,a)
           })(window, document,'script','https://mc.yandex.ru/metrika/tag.js?id=109047859', 'ym');
           ym(109047859, 'init', {ssr:true, webvisor:true, clickmap:true, ecommerce:"dataLayer", referrer: document.referrer, url: location.href, accurateTrackBounce:true, trackLinks:true});
-        `}} />
-        <noscript><div><img src="https://mc.yandex.ru/watch/109047859" style={{position:"absolute", left:"-9999px"}} alt="" /></div></noscript>
+        `,
+          }}
+        />
+        <noscript>
+          <div>
+            <img
+              src="https://mc.yandex.ru/watch/109047859"
+              style={{ position: "absolute", left: "-9999px" }}
+              alt=""
+            />
+          </div>
+        </noscript>
         {/* /Yandex.Metrika counter */}
 
         {css.map((resource) => CSSResourceToStyleElement(resource, true))}

@@ -1,7 +1,16 @@
 import { QuartzEmitterPlugin } from "../types"
-import { i18n } from "../../i18n"
+import { TRANSLATIONS, i18n } from "../../i18n"
 import { unescapeHTML } from "../../util/escape"
-import { FullSlug, getFileExtension, isAbsoluteURL, joinSegments, QUARTZ } from "../../util/path"
+import {
+  FilePath,
+  FullSlug,
+  getFileExtension,
+  isAbsoluteURL,
+  joinSegments,
+  QUARTZ,
+  slugifyFilePath,
+  stripSlashes,
+} from "../../util/path"
 import { ImageOptions, SocialImageOptions, defaultImage, getSatoriFonts } from "../../util/og"
 import sharp from "sharp"
 import satori, { SatoriOptions } from "satori"
@@ -19,6 +28,59 @@ const defaultOptions: SocialImageOptions = {
   height: 630,
   imageStructure: defaultImage,
   excludeRoot: false,
+}
+
+function nonEmptyString(value: unknown): string | undefined {
+  const text = typeof value === "string" ? value.trim() : undefined
+  return text ? text : undefined
+}
+
+function getSocialDescription(
+  fileData: QuartzPluginData,
+  locale: keyof typeof TRANSLATIONS,
+): string {
+  return (
+    nonEmptyString(fileData.frontmatter?.socialDescription) ??
+    nonEmptyString(fileData.frontmatter?.description) ??
+    unescapeHTML(fileData.description?.trim() ?? i18n(locale).propertyDefaults.description)
+  )
+}
+
+function unwrapObsidianImagePath(rawPath: string): string {
+  let imagePath = rawPath.trim()
+  const wikilink = imagePath.match(/^!?\[\[([^\]]+)\]\]$/)
+  if (wikilink) {
+    imagePath = wikilink[1]
+  }
+
+  return imagePath.split("|", 1)[0].split("#", 1)[0].trim()
+}
+
+function resolveSocialImageUrl(
+  rawPath: unknown,
+  baseUrl: string,
+  allSlugs: FullSlug[],
+): string | undefined {
+  const imagePath = nonEmptyString(rawPath)
+  if (!imagePath) return undefined
+
+  const unwrappedPath = unwrapObsidianImagePath(imagePath)
+  if (isAbsoluteURL(unwrappedPath)) {
+    return unwrappedPath
+  }
+
+  const imageSlug = slugifyFilePath(stripSlashes(unwrappedPath) as FilePath)
+  const matchingSlug = imageSlug.includes("/")
+    ? allSlugs.find((slug) => slug === imageSlug)
+    : allSlugs.find((slug) => slug.split("/").at(-1) === imageSlug)
+
+  const sitePath =
+    matchingSlug ?? (imageSlug.includes("/") ? imageSlug : joinSegments("static", imageSlug))
+  return new URL(sitePath, `https://${baseUrl}/`).toString()
+}
+
+function imageMimeType(imagePath: string): string {
+  return `image/${getFileExtension(imagePath)?.slice(1) ?? "png"}`
 }
 
 /**
@@ -49,7 +111,7 @@ async function generateSocialImage(
     iconBase64,
   })
 
-  const svg = await satori(imageComponent, {
+  const svg = await satori(imageComponent as unknown as Parameters<typeof satori>[0], {
     width,
     height,
     fonts,
@@ -76,10 +138,7 @@ async function processOgImage(
   const titleSuffix = cfg.pageTitleSuffix ?? ""
   const title =
     (fileData.frontmatter?.title ?? i18n(cfg.locale).propertyDefaults.title) + titleSuffix
-  const description =
-    fileData.frontmatter?.socialDescription ??
-    fileData.frontmatter?.description ??
-    unescapeHTML(fileData.description?.trim() ?? i18n(cfg.locale).propertyDefaults.description)
+  const description = getSocialDescription(fileData, cfg.locale)
 
   const stream = await generateSocialImage(
     {
@@ -116,7 +175,7 @@ export const CustomOgImages: QuartzEmitterPlugin<Partial<SocialImageOptions>> = 
       const fonts = await getSatoriFonts(headerFont, bodyFont)
 
       for (const [_tree, vfile] of content) {
-        if (vfile.data.frontmatter?.socialImage !== undefined) continue
+        if (nonEmptyString(vfile.data.frontmatter?.socialImage) !== undefined) continue
         yield processOgImage(ctx, vfile.data, fonts, fullOptions)
       }
     },
@@ -129,7 +188,7 @@ export const CustomOgImages: QuartzEmitterPlugin<Partial<SocialImageOptions>> = 
       // find all slugs that changed or were added
       for (const changeEvent of changeEvents) {
         if (!changeEvent.file) continue
-        if (changeEvent.file.data.frontmatter?.socialImage !== undefined) continue
+        if (nonEmptyString(changeEvent.file.data.frontmatter?.socialImage) !== undefined) continue
         if (changeEvent.type === "add" || changeEvent.type === "change") {
           yield processOgImage(ctx, changeEvent.file.data, fonts, fullOptions)
         }
@@ -145,20 +204,18 @@ export const CustomOgImages: QuartzEmitterPlugin<Partial<SocialImageOptions>> = 
         additionalHead: [
           (pageData) => {
             const isRealFile = pageData.filePath !== undefined
-            let userDefinedOgImagePath = pageData.frontmatter?.socialImage
-
-            if (userDefinedOgImagePath) {
-              userDefinedOgImagePath = isAbsoluteURL(userDefinedOgImagePath)
-                ? userDefinedOgImagePath
-                : `https://${baseUrl}/static/${userDefinedOgImagePath}`
-            }
+            const userDefinedOgImagePath = resolveSocialImageUrl(
+              pageData.frontmatter?.socialImage,
+              baseUrl,
+              ctx.allSlugs,
+            )
 
             const generatedOgImagePath = isRealFile
               ? `https://${baseUrl}/${pageData.slug!}-og-image.webp`
               : undefined
             const defaultOgImagePath = `https://${baseUrl}/static/og-image.png`
             const ogImagePath = userDefinedOgImagePath ?? generatedOgImagePath ?? defaultOgImagePath
-            const ogImageMimeType = `image/${getFileExtension(ogImagePath) ?? "png"}`
+            const ogImageMimeType = imageMimeType(ogImagePath)
             return (
               <>
                 {!userDefinedOgImagePath && (
