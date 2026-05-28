@@ -305,6 +305,11 @@ a {
         margin-left: 0;
       }
     }
+
+    & .center {
+      grid-area: grid-center;
+    }
+
     & footer {
       margin-left: 0;
     }
