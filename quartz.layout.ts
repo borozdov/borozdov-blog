@@ -1,6 +1,10 @@
 import { PageLayout, SharedLayout } from "./quartz/cfg"
 import * as Component from "./quartz/components"
 
+const sidebarExplorerOptions: Parameters<typeof Component.Explorer>[0] = {
+  showTitle: false,
+}
+
 // components shared across all pages
 export const sharedPageComponents: SharedLayout = {
   head: Component.Head(),
@@ -42,7 +46,7 @@ export const defaultContentPageLayout: PageLayout = {
         { Component: Component.ReaderMode() },
       ],
     }),
-    Component.Explorer(),
+    Component.Explorer(sidebarExplorerOptions),
   ],
   right: [
     Component.Graph(),
@@ -66,7 +70,7 @@ export const defaultListPageLayout: PageLayout = {
         { Component: Component.Darkmode() },
       ],
     }),
-    Component.Explorer(),
+    Component.Explorer(sidebarExplorerOptions),
   ],
   right: [],
 }
