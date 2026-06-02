@@ -23,6 +23,7 @@ import fs from "node:fs/promises"
 import { styleText } from "util"
 
 const defaultOptions: SocialImageOptions = {
+  generateFallbackImages: true,
   colorScheme: "lightMode",
   width: 1200,
   height: 630,
@@ -81,6 +82,15 @@ function resolveSocialImageUrl(
 
 function imageMimeType(imagePath: string): string {
   return `image/${getFileExtension(imagePath)?.slice(1) ?? "png"}`
+}
+
+function shouldGenerateOgImage(
+  fileData: QuartzPluginData,
+  fullOptions: SocialImageOptions,
+): boolean {
+  if (!fullOptions.generateFallbackImages) return false
+  if (fullOptions.excludeRoot && fileData.slug === "index") return false
+  return nonEmptyString(fileData.frontmatter?.socialImage) === undefined
 }
 
 /**
@@ -169,29 +179,40 @@ export const CustomOgImages: QuartzEmitterPlugin<Partial<SocialImageOptions>> = 
       return []
     },
     async *emit(ctx, content, _resources) {
+      const filesToGenerate = content
+        .map(([_tree, vfile]) => vfile.data)
+        .filter((fileData) => shouldGenerateOgImage(fileData, fullOptions))
+
+      if (filesToGenerate.length === 0) return
+
       const cfg = ctx.cfg.configuration
       const headerFont = cfg.theme.typography.header
       const bodyFont = cfg.theme.typography.body
       const fonts = await getSatoriFonts(headerFont, bodyFont)
 
-      for (const [_tree, vfile] of content) {
-        if (nonEmptyString(vfile.data.frontmatter?.socialImage) !== undefined) continue
-        yield processOgImage(ctx, vfile.data, fonts, fullOptions)
+      for (const fileData of filesToGenerate) {
+        yield processOgImage(ctx, fileData, fonts, fullOptions)
       }
     },
     async *partialEmit(ctx, _content, _resources, changeEvents) {
+      const filesToGenerate = changeEvents
+        .filter((changeEvent) => changeEvent.type === "add" || changeEvent.type === "change")
+        .map((changeEvent) => changeEvent.file?.data)
+        .filter(
+          (fileData): fileData is QuartzPluginData =>
+            fileData !== undefined && shouldGenerateOgImage(fileData, fullOptions),
+        )
+
+      if (filesToGenerate.length === 0) return
+
       const cfg = ctx.cfg.configuration
       const headerFont = cfg.theme.typography.header
       const bodyFont = cfg.theme.typography.body
       const fonts = await getSatoriFonts(headerFont, bodyFont)
 
       // find all slugs that changed or were added
-      for (const changeEvent of changeEvents) {
-        if (!changeEvent.file) continue
-        if (nonEmptyString(changeEvent.file.data.frontmatter?.socialImage) !== undefined) continue
-        if (changeEvent.type === "add" || changeEvent.type === "change") {
-          yield processOgImage(ctx, changeEvent.file.data, fonts, fullOptions)
-        }
+      for (const fileData of filesToGenerate) {
+        yield processOgImage(ctx, fileData, fonts, fullOptions)
       }
     },
     externalResources: (ctx) => {
@@ -210,9 +231,10 @@ export const CustomOgImages: QuartzEmitterPlugin<Partial<SocialImageOptions>> = 
               ctx.allSlugs,
             )
 
-            const generatedOgImagePath = isRealFile
-              ? `https://${baseUrl}/${pageData.slug!}-og-image.webp`
-              : undefined
+            const generatedOgImagePath =
+              isRealFile && shouldGenerateOgImage(pageData, fullOptions)
+                ? `https://${baseUrl}/${pageData.slug!}-og-image.webp`
+                : undefined
             const defaultOgImagePath = `https://${baseUrl}/static/og-image.png`
             const ogImagePath = userDefinedOgImagePath ?? generatedOgImagePath ?? defaultOgImagePath
             const ogImageMimeType = imageMimeType(ogImagePath)

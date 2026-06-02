@@ -119,6 +119,10 @@ export async function fetchTtf(
 
 export type SocialImageOptions = {
   /**
+   * Whether to generate fallback OG images for pages without a `socialImage` frontmatter property.
+   */
+  generateFallbackImages: boolean
+  /**
    * What color scheme to use for image generation (uses colors from config theme)
    */
   colorScheme: ThemeKey
