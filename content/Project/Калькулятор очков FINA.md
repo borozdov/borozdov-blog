@@ -22,5 +22,4 @@ telegram_discussion: ""
 
 Сайт — https://fina.borozdov.ru/
 Приложение в RuStore — https://www.rustore.ru/catalog/app/ru.borozdov.finapoints
-
 GitHub — https://github.com/borozdov/fina-points-calculator
