@@ -1,3 +1,667 @@
 @use "./base.scss";
+@use "./variables.scss" as *;
 
-// put your custom CSS here!
+/* ============================================================
+   BOROZDOV — брендовый слой поверх темы Quartz
+   Два лика: ТИТАН (светлый) и ОБСИДИАН (тёмный).
+   Монохром, инверсия — единственный акцент, линии вместо теней.
+   ============================================================ */
+
+/* --- Роли палитры, которых нет в переменных Quartz --- */
+:root {
+  --canvas: #fafafa;
+  --inset: #ececec;
+  --surface: #ffffff;
+  --hoverbg: #f2f2f2;
+  --b-border: #e4e4e4;
+  --b-border-strong: #8a8a8a;
+  --slate: #6b6b6b;
+  --soft: #3d3d3d;
+  --text: #0d0d0d;
+  --focus-ring: rgba(13, 13, 13, 0.22);
+  --scrim: rgba(13, 13, 13, 0.45);
+}
+
+:root[saved-theme="dark"] {
+  --canvas: #0d0d0d;
+  --inset: #121212;
+  --surface: #1a1a1a;
+  --hoverbg: #212121;
+  --b-border: #2e2e2e;
+  --b-border-strong: #6b6b6b;
+  --slate: #8a8a8a;
+  --soft: #d1d1d1;
+  --text: #fafafa;
+  --focus-ring: rgba(250, 250, 250, 0.22);
+  --scrim: rgba(0, 0, 0, 0.7);
+}
+
+/* --- Линии вместо теней --- */
+* {
+  box-shadow: none !important;
+}
+
+/* --- Выделение текста: инверсия в обоих ликах --- */
+::selection {
+  background: var(--text);
+  color: var(--canvas);
+}
+
+/* --- Скроллбар --- */
+::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+::-webkit-scrollbar-track {
+  background: var(--canvas);
+}
+::-webkit-scrollbar-thumb {
+  background: var(--b-border-strong);
+  border-radius: 4px;
+  border: 2px solid var(--canvas);
+}
+::-webkit-scrollbar-thumb:hover {
+  background: var(--text);
+}
+
+/* --- Фокус --- */
+a:focus-visible,
+button:focus-visible,
+input:focus-visible,
+[tabindex]:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 3px var(--focus-ring) !important;
+  border-radius: 4px;
+}
+
+/* --- Типографика: прописные — голос бренда --- */
+body {
+  font-optical-sizing: auto;
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6,
+.article-title {
+  text-transform: uppercase;
+  letter-spacing: -0.02em;
+  font-weight: $semiBoldWeight;
+}
+
+.page-title {
+  text-transform: uppercase;
+  letter-spacing: -0.02em;
+  font-weight: 700;
+
+  a {
+    color: var(--text);
+  }
+}
+
+/* Цифры и даты — моно с табличными цифрами */
+.content-meta,
+.meta,
+time,
+.date {
+  font-family: "JetBrains Mono", var(--codeFont), ui-monospace, monospace;
+  font-feature-settings: "tnum";
+  font-variant-numeric: tabular-nums;
+  font-size: 0.8rem;
+  color: var(--slate);
+}
+
+/* --- Ссылки в тексте: подчёркивание, ховер-жест — инверсия --- */
+article a.internal,
+article a.external,
+footer a {
+  background: none;
+  border-radius: 2px;
+  padding: 0 0.1em;
+  color: var(--text);
+  text-decoration: underline;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 3px;
+  text-decoration-color: var(--b-border-strong);
+  transition:
+    background 0.15s ease,
+    color 0.15s ease;
+
+  &:hover {
+    background: var(--text);
+    color: var(--canvas);
+    text-decoration: none;
+  }
+}
+
+/* Мобильный лэйаут: колонка не должна растягиваться по max-content
+   (в теме grid-template-columns: auto — шапка с поиском распирала страницу) */
+@media all and ($mobile) {
+  .page > #quartz-body {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .page > #quartz-body .sidebar.left {
+    width: 100%;
+    min-width: 0;
+    box-sizing: border-box;
+    flex-wrap: wrap;
+  }
+
+  .search {
+    min-width: 0;
+  }
+}
+
+/* Длинные URL и слова не растягивают колонку на мобильных */
+article,
+.b-links,
+.b-card {
+  overflow-wrap: anywhere;
+}
+
+/* --- Секции контента отделяются hairline-линиями --- */
+hr {
+  height: 1px;
+  border: none;
+  background: var(--b-border);
+  overflow: visible;
+  margin: 3rem 0;
+}
+
+/* --- Поиск --- */
+.search {
+  & > .search-button {
+    background-color: var(--inset);
+    border: 1px solid var(--b-border);
+    border-radius: 6px;
+    transition: border-color 0.15s ease;
+
+    &:hover,
+    &:focus {
+      background-color: var(--inset);
+      border-color: var(--b-border-strong);
+    }
+
+    & > p {
+      color: var(--slate);
+      text-transform: uppercase;
+      font-size: 0.7rem;
+      letter-spacing: 0.08em;
+      font-weight: 500;
+    }
+  }
+
+  & > .search-container {
+    background: var(--scrim);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+
+    & > .search-space {
+      & > .input-container > input {
+        background: var(--inset);
+        border: 1px solid var(--b-border);
+        border-radius: 6px;
+
+        &:focus {
+          border-color: var(--b-border-strong);
+        }
+      }
+
+      & > .search-layout {
+        background: var(--surface);
+        border: 1px solid var(--b-border);
+        border-radius: 8px;
+
+        .result-card:hover,
+        .result-card:focus {
+          background: var(--hoverbg);
+        }
+      }
+    }
+  }
+}
+
+/* --- Попаповеры --- */
+.popover {
+  & > .popover-inner {
+    background: var(--surface);
+    border: 1px solid var(--b-border);
+    border-radius: 8px;
+  }
+}
+
+/* --- Explorer / сайдбар --- */
+.explorer {
+  button.folder-button,
+  a {
+    transition: color 0.15s ease;
+  }
+}
+
+button.desktop-explorer .lucide-menu {
+  stroke-width: 2;
+}
+
+/* --- Граф --- */
+.graph {
+  & > .graph-outer {
+    background: var(--surface);
+    border: 1px solid var(--b-border);
+    border-radius: 8px;
+  }
+}
+
+/* --- Оглавление, бэклинки --- */
+.backlinks {
+  & > ul > li > a {
+    background: transparent;
+    border: 1px solid var(--b-border);
+    border-radius: 6px;
+
+    &:hover {
+      border-color: var(--b-border-strong);
+      background: var(--hoverbg);
+      color: var(--text);
+    }
+  }
+}
+
+/* --- Теги: контурные бейджи, UPPERCASE --- */
+a.internal.tag-link {
+  background: transparent;
+  border: 1px solid var(--b-border-strong);
+  border-radius: 2px;
+  color: var(--soft);
+  text-transform: uppercase;
+  font-size: 0.65rem;
+  font-weight: 500;
+  letter-spacing: 0.08em;
+  padding: 0.15rem 0.5rem;
+  text-decoration: none;
+
+  &:hover {
+    background: var(--text);
+    color: var(--canvas);
+    border-color: var(--text);
+  }
+}
+
+/* --- Код --- */
+pre,
+code {
+  border-radius: 6px;
+}
+
+pre {
+  border: 1px solid var(--b-border);
+  background: var(--inset) !important;
+}
+
+p code,
+li code {
+  background: var(--inset);
+  border: 1px solid var(--b-border);
+  border-radius: 4px;
+}
+
+/* --- Таблицы --- */
+table {
+  border: 1px solid var(--b-border);
+  border-radius: 8px;
+  border-collapse: separate;
+  border-spacing: 0;
+  overflow: hidden;
+
+  th {
+    background: var(--inset);
+    color: var(--slate);
+    text-transform: uppercase;
+    font-size: 0.7rem;
+    letter-spacing: 0.12em;
+    font-weight: 500;
+    border-bottom: 1px solid var(--b-border);
+  }
+
+  td {
+    border-bottom: 1px solid var(--b-border);
+  }
+
+  tr:last-child td {
+    border-bottom: none;
+  }
+
+  tbody tr:hover {
+    background: var(--hoverbg);
+  }
+}
+
+/* --- Колауты: монохром, никаких цветных подложек --- */
+.callout {
+  --color: var(--soft) !important;
+  --border: var(--b-border) !important;
+  --bg: var(--surface) !important;
+  border: 1px solid var(--b-border);
+  border-radius: 8px;
+
+  & > .callout-title {
+    color: var(--text);
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    font-size: 0.8rem;
+  }
+}
+
+/* --- Цитаты --- */
+blockquote {
+  border-left: 2px solid var(--text);
+  background: transparent;
+}
+
+/* --- Футер --- */
+footer {
+  border-top: 1px solid var(--b-border);
+  padding-top: 1.5rem;
+  margin-top: 4rem;
+
+  p {
+    color: var(--slate);
+    text-transform: uppercase;
+    font-size: 0.7rem;
+    letter-spacing: 0.12em;
+    font-weight: 500;
+  }
+
+  ul li a {
+    text-transform: uppercase;
+    font-size: 0.7rem;
+    letter-spacing: 0.12em;
+    font-weight: 500;
+    color: var(--slate);
+    text-decoration: none;
+
+    &:hover {
+      background: var(--text);
+      color: var(--canvas);
+    }
+  }
+}
+
+/* ============================================================
+   Компоненты лендинга (используются в content/index.md)
+   ============================================================ */
+
+/* Лейбл-надзаголовок */
+.b-label {
+  display: block;
+  color: var(--slate);
+  text-transform: uppercase;
+  font-size: 0.7rem;
+  font-weight: 500;
+  letter-spacing: 0.16em;
+  margin: 0 0 0.75rem;
+}
+
+/* Герой */
+.b-hero {
+  padding: 1.5rem 0 2.5rem;
+  border-bottom: 1px solid var(--b-border);
+
+  .b-hero-title {
+    font-size: clamp(2.4rem, 8vw, 4.2rem);
+    line-height: 0.95;
+    margin: 0 0 1.25rem;
+    text-transform: uppercase;
+    letter-spacing: -0.02em;
+    font-weight: 600;
+    color: var(--text);
+  }
+
+  .b-hero-sub {
+    max-width: 34rem;
+    font-size: 1.05rem;
+    line-height: 1.6;
+    color: var(--soft);
+    margin: 0 0 1.75rem;
+  }
+}
+
+/* Кнопки */
+.b-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.6rem;
+}
+
+a.b-btn,
+a.b-btn.internal,
+a.b-btn.external {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.65rem 1.1rem;
+  border-radius: 4px;
+  text-transform: uppercase;
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-decoration: none;
+  background: transparent;
+  border: 1px solid var(--b-border);
+  color: var(--text);
+  transition:
+    border-color 0.15s ease,
+    background 0.15s ease,
+    color 0.15s ease,
+    filter 0.15s ease;
+
+  &:hover {
+    border-color: var(--b-border-strong);
+    background: transparent;
+    color: var(--text);
+  }
+
+  svg {
+    width: 14px;
+    height: 14px;
+    stroke-width: 2;
+  }
+}
+
+a.b-btn--primary,
+a.b-btn--primary.internal,
+a.b-btn--primary.external {
+  background: var(--text);
+  color: var(--canvas);
+  border-color: var(--text);
+
+  &:hover {
+    background: var(--text);
+    color: var(--canvas);
+    border-color: var(--text);
+    filter: brightness(0.85);
+  }
+}
+
+/* Секции лендинга */
+.b-section {
+  padding: 2.5rem 0;
+  border-bottom: 1px solid var(--b-border);
+
+  &:last-of-type {
+    border-bottom: none;
+  }
+
+  h2 {
+    margin-top: 0;
+  }
+}
+
+/* Карточка проекта */
+.b-card {
+  display: block;
+  max-width: 100%;
+  background: var(--surface);
+  border: 1px solid var(--b-border);
+  border-radius: 8px;
+  padding: 1.5rem;
+  color: var(--text);
+  transition: border-color 0.15s ease;
+
+  &:hover {
+    border-color: var(--b-border-strong);
+  }
+
+  h3.b-card-title {
+    margin: 0.7rem 0 0.6rem;
+    font-size: 1.35rem;
+
+    a,
+    a.internal {
+      background: none;
+      padding: 0;
+      color: var(--text);
+      text-decoration: none;
+
+      &:hover {
+        background: var(--text);
+        color: var(--canvas);
+      }
+    }
+  }
+
+  p.b-card-text {
+    color: var(--soft);
+    margin: 0 0 1.2rem;
+    line-height: 1.55;
+  }
+}
+
+a.b-card-cta,
+a.b-card-cta.internal {
+  display: inline-block;
+  padding: 0.45rem 0.9rem;
+  background: transparent;
+  border: 1px solid var(--b-border-strong);
+  border-radius: 4px;
+  color: var(--text);
+  text-decoration: none;
+  text-transform: uppercase;
+  font-size: 0.68rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  transition:
+    background 0.15s ease,
+    color 0.15s ease,
+    border-color 0.15s ease;
+
+  &:hover {
+    background: var(--text);
+    color: var(--canvas);
+    border-color: var(--text);
+  }
+}
+
+/* Бейдж «инверсия» */
+.b-badge {
+  display: inline-block;
+  background: var(--text);
+  color: var(--canvas);
+  border-radius: 2px;
+  padding: 0.2rem 0.5rem;
+  text-transform: uppercase;
+  font-size: 0.62rem;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+}
+
+/* Бейдж вторичный, контурный */
+.b-badge--outline {
+  background: transparent;
+  color: var(--soft);
+  border: 1px solid var(--b-border-strong);
+}
+
+/* Список ссылок-строк */
+.b-links {
+  display: flex;
+  flex-direction: column;
+  border: 1px solid var(--b-border);
+  border-radius: 8px;
+  overflow: hidden;
+  background: var(--surface);
+
+  a,
+  a.internal,
+  a.external {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 0.35rem 1rem;
+    min-width: 0;
+    padding: 0.9rem 1.2rem;
+    text-decoration: none;
+    background: transparent;
+    color: var(--text);
+    border-bottom: 1px solid var(--b-border);
+    font-weight: 500;
+    transition: background 0.15s ease;
+
+    &:last-child {
+      border-bottom: none;
+    }
+
+    &:hover {
+      background: var(--hoverbg);
+      color: var(--text);
+    }
+
+    span {
+      color: var(--slate);
+      font-family: "JetBrains Mono", var(--codeFont), ui-monospace, monospace;
+      font-size: 0.72rem;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+    }
+  }
+}
+
+/* Появление: fade + подъём */
+@media (prefers-reduced-motion: no-preference) {
+  .b-hero,
+  .b-section {
+    animation: b-rise 0.3s ease both;
+  }
+
+  .b-section:nth-of-type(2) {
+    animation-delay: 0.05s;
+  }
+
+  .b-section:nth-of-type(3) {
+    animation-delay: 0.1s;
+  }
+}
+
+@keyframes b-rise {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Страница-лендинг: скрыть дубли шапки и пустые виджеты на главной */
+[data-slug="index"] {
+  .content-meta,
+  .article-title,
+  .graph,
+  .backlinks {
+    display: none;
+  }
+}

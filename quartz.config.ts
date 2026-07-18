@@ -8,7 +8,7 @@ import * as Plugin from "./quartz/plugins"
  */
 const config: QuartzConfig = {
   configuration: {
-    pageTitle: "Borozdov Blog",
+    pageTitle: "BOROZDOV",
     pageTitleSuffix: "",
     enableSPA: true,
     enablePopovers: true,
@@ -23,32 +23,33 @@ const config: QuartzConfig = {
       fontOrigin: "googleFonts",
       cdnCaching: true,
       typography: {
-        header: "Schibsted Grotesk",
-        body: "Source Sans Pro",
-        code: "IBM Plex Mono",
+        header: "Inter",
+        body: "Inter",
+        code: "JetBrains Mono",
       },
+      // BOROZDOV brand: два лика — ТИТАН (light) и ОБСИДИАН (dark), только серая шкала
       colors: {
         lightMode: {
-          light: "#faf8f8",
-          lightgray: "#e5e5e5",
-          gray: "#b8b8b8",
-          darkgray: "#4e4e4e",
-          dark: "#2b2b2b",
-          secondary: "#000000",
-          tertiary: "#84a59d",
-          highlight: "rgba(143, 159, 169, 0.15)",
-          textHighlight: "#fff23688",
+          light: "#fafafa", // canvas
+          lightgray: "#e4e4e4", // border
+          gray: "#6b6b6b", // slate
+          darkgray: "#0d0d0d", // text
+          dark: "#0d0d0d", // text
+          secondary: "#0d0d0d", // ссылки — тот же полюс текста, различаются подчёркиванием
+          tertiary: "#3d3d3d", // soft — ховеры
+          highlight: "rgba(13, 13, 13, 0.05)",
+          textHighlight: "rgba(13, 13, 13, 0.12)",
         },
         darkMode: {
-          light: "#161618",
-          lightgray: "#393639",
-          gray: "#646464",
-          darkgray: "#d4d4d4",
-          dark: "#ebebec",
-          secondary: "#ffffff",
-          tertiary: "#84a59d",
-          highlight: "rgba(143, 159, 169, 0.15)",
-          textHighlight: "#b3aa0288",
+          light: "#0d0d0d", // canvas
+          lightgray: "#2e2e2e", // border
+          gray: "#8a8a8a", // slate
+          darkgray: "#fafafa", // text
+          dark: "#fafafa", // text
+          secondary: "#fafafa",
+          tertiary: "#d1d1d1", // soft — ховеры
+          highlight: "rgba(250, 250, 250, 0.06)",
+          textHighlight: "rgba(250, 250, 250, 0.16)",
         },
       },
     },

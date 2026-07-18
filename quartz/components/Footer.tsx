@@ -11,7 +11,7 @@ export default ((opts?: Options) => {
     const links = opts?.links ?? []
     return (
       <footer class={`${displayClass ?? ""}`}>
-        <p>Borozdov Blog © {year}</p>
+        <p>BY BOROZDOV © {year}</p>
         <ul>
           {Object.entries(links).map(([text, link]) => (
             <li>
