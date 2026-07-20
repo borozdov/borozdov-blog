@@ -661,7 +661,8 @@ a.b-card-cta.internal {
   .content-meta,
   .article-title,
   .graph,
-  .backlinks {
+  .backlinks,
+  .center > hr {
     display: none;
   }
 }

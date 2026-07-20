@@ -18,10 +18,7 @@ export const sharedPageComponents: SharedLayout = {
     }),
   ],
   footer: Component.Footer({
-    links: {
-      GITHUB: "https://github.com/borozdov",
-      "FINA POINTS": "https://fina.borozdov.ru/",
-    },
+    links: {},
   }),
 }
 
