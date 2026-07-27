@@ -2,7 +2,7 @@
 title: Калькулятор очков FINA
 description: Приложение для расчета плавательных очков FINA от Nikita Borozdov
 socialDescription: Приложение для расчета плавательных очков FINA от Nikita Borozdov
-draft: false
+draft: true
 tags: []
 aliases:
   - fina-point
