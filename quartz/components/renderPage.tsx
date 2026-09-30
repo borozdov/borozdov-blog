@@ -249,19 +249,19 @@ export function renderPage(
   const Body = BodyConstructor()
 
   const LeftComponent = (
-    <div class="left sidebar">
+    <aside class="left sidebar">
       {left.map((BodyComponent) => (
         <BodyComponent {...componentData} />
       ))}
-    </div>
+    </aside>
   )
 
   const RightComponent = (
-    <div class="right sidebar">
+    <aside class="right sidebar">
       {right.map((BodyComponent) => (
         <BodyComponent {...componentData} />
       ))}
-    </div>
+    </aside>
   )
 
   const lang = componentData.fileData.frontmatter?.lang ?? cfg.locale?.split("-")[0] ?? "en"
@@ -275,29 +275,28 @@ export function renderPage(
         </a>
         <div id="quartz-root" class="page">
           <Body {...componentData}>
-            {LeftComponent}
-            <div class="center" id="main-content" tabIndex={-1}>
-              <div class="page-header">
-                <Header {...componentData}>
-                  {header.map((HeaderComponent) => (
-                    <HeaderComponent {...componentData} />
-                  ))}
-                </Header>
-                <div class="popover-hint">
+            <Header {...componentData}>
+              {header.map((HeaderComponent) => (
+                <HeaderComponent {...componentData} />
+              ))}
+            </Header>
+            <div class="site-body">
+              {LeftComponent}
+              <main class="center" id="main-content" tabIndex={-1}>
+                <div class="page-header popover-hint">
                   {beforeBody.map((BodyComponent) => (
                     <BodyComponent {...componentData} />
                   ))}
                 </div>
-              </div>
-              <Content {...componentData} />
-              <hr />
-              <div class="page-footer">
-                {afterBody.map((BodyComponent) => (
-                  <BodyComponent {...componentData} />
-                ))}
-              </div>
+                <Content {...componentData} />
+                <div class="page-footer">
+                  {afterBody.map((BodyComponent) => (
+                    <BodyComponent {...componentData} />
+                  ))}
+                </div>
+              </main>
+              {RightComponent}
             </div>
-            {RightComponent}
             <Footer {...componentData} />
           </Body>
         </div>

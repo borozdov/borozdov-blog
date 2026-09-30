@@ -1,17 +1,22 @@
-const observer = new IntersectionObserver((entries) => {
-  for (const entry of entries) {
-    const slug = entry.target.id
-    const tocEntryElements = document.querySelectorAll(`a[data-for="${slug}"]`)
-    const windowHeight = entry.rootBounds?.height
-    if (windowHeight && tocEntryElements.length > 0) {
-      if (entry.boundingClientRect.y < windowHeight) {
-        tocEntryElements.forEach((tocEntryElement) => tocEntryElement.classList.add("in-view"))
-      } else {
-        tocEntryElements.forEach((tocEntryElement) => tocEntryElement.classList.remove("in-view"))
+// Раздел считается прочитанным, когда его заголовок ушёл в верхнюю треть экрана:
+// rootMargin сужает область наблюдения до 30% высоты, и в rootBounds приходит она же.
+const observer = new IntersectionObserver(
+  (entries) => {
+    for (const entry of entries) {
+      const slug = entry.target.id
+      const tocEntryElements = document.querySelectorAll(`a[data-for="${slug}"]`)
+      const windowHeight = entry.rootBounds?.height
+      if (windowHeight && tocEntryElements.length > 0) {
+        if (entry.boundingClientRect.y < windowHeight) {
+          tocEntryElements.forEach((tocEntryElement) => tocEntryElement.classList.add("in-view"))
+        } else {
+          tocEntryElements.forEach((tocEntryElement) => tocEntryElement.classList.remove("in-view"))
+        }
       }
     }
-  }
-})
+  },
+  { rootMargin: "0px 0px -70% 0px" },
+)
 
 function toggleToc(this: HTMLElement) {
   this.classList.toggle("collapsed")

@@ -26,6 +26,7 @@ export type ContentDetails = {
   richContent?: string
   date?: Date
   description?: string
+  noindex?: boolean
 }
 
 interface Options {
@@ -53,6 +54,7 @@ function generateSiteMap(cfg: GlobalConfiguration, idx: ContentIndexMap): string
     ${content.date && `<lastmod>${content.date.toISOString()}</lastmod>`}
   </url>`
   const urls = Array.from(idx)
+    .filter(([, content]) => !content.noindex)
     .map(([slug, content]) => createURLEntry(simplifySlug(slug), content))
     .join("")
   return `<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:xhtml="http://www.w3.org/1999/xhtml">${urls}</urlset>`
@@ -70,6 +72,7 @@ function generateRSSFeed(cfg: GlobalConfiguration, idx: ContentIndexMap, limit?:
   </item>`
 
   const items = Array.from(idx)
+    .filter(([, content]) => !content.noindex)
     .sort(([_, f1], [__, f2]) => {
       if (f1.date && f2.date) {
         return f2.date.getTime() - f1.date.getTime()
@@ -109,9 +112,6 @@ export const ContentIndex: QuartzEmitterPlugin<Partial<Options>> = (opts) => {
       for (const [tree, file] of content) {
         const slug = file.data.slug!
         const date = getDate(ctx.cfg.configuration, file.data) ?? new Date()
-        // noindex-страницы (витрина /kitchen-sink) не попадают ни в sitemap, ни в RSS,
-        // ни в поиск и explorer: страница собирается, но не рекламируется
-        if (file.data.frontmatter?.noindex === true) continue
         if (opts?.includeEmptyFiles || (file.data.text && file.data.text !== "")) {
           linkIndex.set(slug, {
             slug,
@@ -125,6 +125,9 @@ export const ContentIndex: QuartzEmitterPlugin<Partial<Options>> = (opts) => {
               : undefined,
             date: date,
             description: file.data.description ?? "",
+            // noindex-страницы (витрина /kitchen-sink) видны в проводнике, графе и поиске,
+            // но не попадают в sitemap и RSS
+            noindex: file.data.frontmatter?.noindex === true,
           })
         }
       }
@@ -155,6 +158,7 @@ export const ContentIndex: QuartzEmitterPlugin<Partial<Options>> = (opts) => {
           // for the RSS feed
           delete content.description
           delete content.date
+          delete content.noindex
           return [slug, content]
         }),
       )

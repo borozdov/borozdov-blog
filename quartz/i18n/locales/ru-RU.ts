@@ -22,8 +22,8 @@ export default {
       quote: "Цитата",
     },
     backlinks: {
-      title: "Обратные ссылки",
-      noBacklinksFound: "Обратные ссылки отсутствуют",
+      title: "Ссылаются сюда",
+      noBacklinksFound: "Пока никто не ссылается",
     },
     themeToggle: {
       lightMode: "Светлый режим",
@@ -33,16 +33,16 @@ export default {
       title: "Режим чтения",
     },
     explorer: {
-      title: "Проводник",
+      title: "Разделы",
     },
     footer: {
       createdWith: "Создано с помощью",
     },
     graph: {
-      title: "Вид графа",
+      title: "Связи",
     },
     recentNotes: {
-      title: "Недавние заметки",
+      title: "Последние заметки",
       seeRemainingMore: ({ remaining }) =>
         `Посмотреть оставш${getForm(remaining, "уюся", "иеся", "иеся")} ${remaining} →`,
     },
@@ -52,13 +52,13 @@ export default {
     },
     search: {
       title: "Поиск",
-      searchBarPlaceholder: "Найти что-нибудь",
+      searchBarPlaceholder: "Поиск по заметкам",
     },
     tableOfContents: {
-      title: "Оглавление",
+      title: "На этой странице",
     },
     contentMeta: {
-      readingTime: ({ minutes }) => `время чтения ~${minutes} мин.`,
+      readingTime: ({ minutes }) => `${minutes} мин. чтения`,
     },
   },
   pages: {

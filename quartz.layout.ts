@@ -1,15 +1,31 @@
 import { PageLayout, SharedLayout } from "./quartz/cfg"
 import * as Component from "./quartz/components"
 
-const sidebarExplorerOptions: Parameters<typeof Component.Explorer>[0] = {
-  showTitle: false,
-}
+const isIndex = (slug: string | undefined) => slug === "index"
+
+// Шапка сайта: вордмарк, поиск, лик, режим чтения. Одна на все страницы.
+const siteHeader = [
+  Component.PageTitle(),
+  Component.Spacer(),
+  Component.Search(),
+  Component.Darkmode(),
+  Component.DesktopOnly(Component.ReaderMode()),
+]
 
 // components shared across all pages
 export const sharedPageComponents: SharedLayout = {
   head: Component.Head(),
-  header: [],
+  header: siteHeader,
   afterBody: [
+    Component.ConditionalRender({
+      component: Component.RecentNotes({
+        title: "Последние заметки",
+        limit: 10,
+        showTags: true,
+        filter: (f) => f.slug !== "index" && f.slug !== "kitchen-sink",
+      }),
+      condition: (page) => isIndex(page.fileData.slug),
+    }),
     Component.Comments({
       provider: "telegram",
       options: {
@@ -30,31 +46,20 @@ export const sharedPageComponents: SharedLayout = {
 export const defaultContentPageLayout: PageLayout = {
   beforeBody: [
     Component.ConditionalRender({
-      component: Component.Breadcrumbs({ rootName: "Главная" }),
-      condition: (page) => page.fileData.slug !== "index",
+      component: Component.Breadcrumbs({ rootName: "Главная", spacerSymbol: "/" }),
+      condition: (page) => !isIndex(page.fileData.slug),
     }),
     Component.ArticleTitle(),
-    Component.ContentMeta(),
+    Component.ContentMeta({ showComma: false }),
     Component.TagList(),
   ],
-  left: [
-    Component.PageTitle(),
-    Component.MobileOnly(Component.Spacer()),
-    Component.Flex({
-      components: [
-        {
-          Component: Component.Search(),
-          grow: true,
-        },
-        { Component: Component.Darkmode() },
-        { Component: Component.ReaderMode() },
-      ],
-    }),
-    Component.Explorer(sidebarExplorerOptions),
-  ],
+  left: [Component.Explorer({ title: "Разделы", folderDefaultState: "open" })],
   right: [
-    Component.Graph(),
     Component.DesktopOnly(Component.TableOfContents()),
+    Component.Graph({
+      localGraph: { depth: 2, scale: 1, linkDistance: 40, fontSize: 0.55 },
+      globalGraph: { scale: 0.8, linkDistance: 40, fontSize: 0.55 },
+    }),
     Component.Backlinks(),
   ],
 }
@@ -62,23 +67,11 @@ export const defaultContentPageLayout: PageLayout = {
 // components for pages that display lists of pages  (e.g. tags or folders)
 export const defaultListPageLayout: PageLayout = {
   beforeBody: [
-    Component.Breadcrumbs({ rootName: "Главная" }),
+    Component.Breadcrumbs({ rootName: "Главная", spacerSymbol: "/" }),
     Component.ArticleTitle(),
-    Component.ContentMeta(),
+    Component.ContentMeta({ showComma: false }),
   ],
-  left: [
-    Component.PageTitle(),
-    Component.MobileOnly(Component.Spacer()),
-    Component.Flex({
-      components: [
-        {
-          Component: Component.Search(),
-          grow: true,
-        },
-        { Component: Component.Darkmode() },
-      ],
-    }),
-    Component.Explorer(sidebarExplorerOptions),
-  ],
+  left: [Component.Explorer({ title: "Разделы", folderDefaultState: "open" })],
+  // Страницы папок и тегов не входят в граф — правая колонка пустая
   right: [],
 }

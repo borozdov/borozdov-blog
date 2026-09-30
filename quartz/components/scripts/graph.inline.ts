@@ -175,14 +175,14 @@ async function renderGraph(graph: HTMLElement, fullSlug: FullSlug) {
   if (enableRadial) simulation.force("radial", forceRadial(radius).strength(0.2))
 
   // precompute style prop strings as pixi doesn't support css variables
+  // Роли бренда (canon §2): узлы — ink/soft/strong, связи — hairline, активные — strong
   const cssVars = [
-    "--secondary",
-    "--tertiary",
-    "--gray",
-    "--light",
-    "--lightgray",
-    "--dark",
-    "--darkgray",
+    "--ink",
+    "--soft",
+    "--strong",
+    "--hairline",
+    "--surface",
+    "--canvas",
     "--bodyFont",
   ] as const
   const computedStyleMap = cssVars.reduce(
@@ -197,11 +197,11 @@ async function renderGraph(graph: HTMLElement, fullSlug: FullSlug) {
   const color = (d: NodeData) => {
     const isCurrent = d.id === slug
     if (isCurrent) {
-      return computedStyleMap["--secondary"]
+      return computedStyleMap["--ink"]
     } else if (visited.has(d.id) || d.id.startsWith("tags/")) {
-      return computedStyleMap["--tertiary"]
+      return computedStyleMap["--soft"]
     } else {
-      return computedStyleMap["--gray"]
+      return computedStyleMap["--strong"]
     }
   }
 
@@ -209,7 +209,7 @@ async function renderGraph(graph: HTMLElement, fullSlug: FullSlug) {
     const numLinks = graphData.links.filter(
       (l) => l.source.id === d.id || l.target.id === d.id,
     ).length
-    return 2 + Math.sqrt(numLinks)
+    return 3 + Math.sqrt(numLinks) * 1.5
   }
 
   let hoveredNodeId: string | null = null
@@ -262,7 +262,7 @@ async function renderGraph(graph: HTMLElement, fullSlug: FullSlug) {
         alpha = l.active ? 1 : 0.2
       }
 
-      l.color = l.active ? computedStyleMap["--gray"] : computedStyleMap["--lightgray"]
+      l.color = l.active ? computedStyleMap["--strong"] : computedStyleMap["--hairline"]
       tweenGroup.add(new Tweened<LinkRenderData>(l).to({ alpha }, 200))
     }
 
@@ -382,7 +382,7 @@ async function renderGraph(graph: HTMLElement, fullSlug: FullSlug) {
       anchor: { x: 0.5, y: 1.2 },
       style: {
         fontSize: fontSize * 15,
-        fill: computedStyleMap["--dark"],
+        fill: computedStyleMap["--ink"],
         fontFamily: computedStyleMap["--bodyFont"],
       },
       resolution: window.devicePixelRatio * 4,
@@ -399,7 +399,7 @@ async function renderGraph(graph: HTMLElement, fullSlug: FullSlug) {
       cursor: "pointer",
     })
       .circle(0, 0, nodeRadius(n))
-      .fill({ color: isTagNode ? computedStyleMap["--light"] : color(n) })
+      .fill({ color: isTagNode ? computedStyleMap["--surface"] : color(n) })
       .on("pointerover", (e) => {
         updateHoverInfo(e.target.label)
         oldLabelOpacity = label.alpha
@@ -416,7 +416,7 @@ async function renderGraph(graph: HTMLElement, fullSlug: FullSlug) {
       })
 
     if (isTagNode) {
-      gfx.stroke({ width: 2, color: computedStyleMap["--tertiary"] })
+      gfx.stroke({ width: 1.5, color: computedStyleMap["--strong"] })
     }
 
     nodesContainer.addChild(gfx)
@@ -441,7 +441,7 @@ async function renderGraph(graph: HTMLElement, fullSlug: FullSlug) {
     const linkRenderDatum: LinkRenderData = {
       simulationData: l,
       gfx,
-      color: computedStyleMap["--lightgray"],
+      color: computedStyleMap["--hairline"],
       alpha: 1,
       active: false,
     }

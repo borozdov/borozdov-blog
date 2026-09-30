@@ -8,17 +8,20 @@ interface Options {
 export default ((opts?: Options) => {
   const Footer: QuartzComponent = ({ displayClass }: QuartzComponentProps) => {
     const year = new Date().getFullYear()
-    const links = opts?.links ?? []
+    const links = opts?.links ?? {}
     return (
-      <footer class={`${displayClass ?? ""}`}>
-        <p>BY BOROZDOV © {year}</p>
-        <ul>
-          {Object.entries(links).map(([text, link]) => (
-            <li>
-              <a href={link}>{text}</a>
-            </li>
-          ))}
-        </ul>
+      <footer class={`site-footer ${displayClass ?? ""}`}>
+        <div class="site-footer-inner">
+          <p class="site-footer-mark">BOROZDOV</p>
+          <ul class="site-footer-links">
+            {Object.entries(links).map(([text, link]) => (
+              <li>
+                <a href={link}>{text}</a>
+              </li>
+            ))}
+          </ul>
+          <p class="site-footer-copy">BY BOROZDOV © {year}</p>
+        </div>
       </footer>
     )
   }
