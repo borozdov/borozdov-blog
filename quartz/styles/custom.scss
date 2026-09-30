@@ -1147,7 +1147,19 @@ html:root {
 .popover {
   padding: 0.75rem;
 
+  /* Непрозрачная подложка под прокручиваемой карточкой: Chrome рисует фон
+     скроллера вместе с содержимым, и при отскоке скролла он уезжал, оставляя
+     рамку над просвечивающей страницей. Подложка это закрывает. */
+  &::before {
+    content: "";
+    position: absolute;
+    inset: 0.75rem;
+    background: var(--surface);
+    border-radius: 8px;
+  }
+
   & > .popover-inner {
+    position: relative;
     width: 26rem;
     max-height: 22rem;
     padding: 1.1rem 1.25rem 1.25rem;
@@ -1158,6 +1170,8 @@ html:root {
     font-size: 0.86rem;
     line-height: 1.55;
     user-select: text;
+    /* Без отскока на краях: содержимое не тянется за границу карточки */
+    overscroll-behavior: none;
   }
 
   .breadcrumb-container,
