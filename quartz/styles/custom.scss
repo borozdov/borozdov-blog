@@ -1142,11 +1142,106 @@ html:root {
 
 /* ---------- Попаповеры ----------------------------------------------------- */
 
-.popover > .popover-inner {
-  background: var(--surface);
-  border: 1px solid var(--hairline);
-  border-radius: 8px;
-  color: var(--soft);
+/* Карточка предпросмотра заметки при наведении на ссылку: заголовок, дата,
+   теги и начало текста в уменьшенном кегле. Крошки и якоря заголовков скрыты. */
+.popover {
+  padding: 0.75rem;
+
+  & > .popover-inner {
+    width: 26rem;
+    max-height: 22rem;
+    padding: 1.1rem 1.25rem 1.25rem;
+    background: var(--surface);
+    border: 1px solid var(--hairline);
+    border-radius: 8px;
+    color: var(--soft);
+    font-size: 0.86rem;
+    line-height: 1.55;
+    user-select: text;
+  }
+
+  .breadcrumb-container,
+  a[role="anchor"],
+  .clipboard-button {
+    display: none !important;
+  }
+
+  .page-header {
+    margin: 0 0 0.75rem;
+    padding-bottom: 0.75rem;
+    border-bottom: 1px solid var(--hairline);
+  }
+
+  .article-title {
+    font-size: 1.05rem;
+    margin: 0 0 0.4rem;
+    line-height: 1.15;
+  }
+
+  .content-meta {
+    margin: 0;
+    font-size: 0.66rem;
+  }
+
+  .tags {
+    margin: 0.6rem 0 0;
+    gap: 0.3rem;
+  }
+
+  a.internal.tag-link {
+    font-size: 0.58rem;
+    padding: 0.15rem 0.4rem;
+  }
+
+  article {
+    & > :first-child {
+      margin-top: 0;
+    }
+
+    h1,
+    h2,
+    h3,
+    h4,
+    h5,
+    h6 {
+      font-size: 0.82rem;
+      margin: 1.25em 0 0.4em;
+      letter-spacing: 0.02em;
+    }
+
+    p,
+    li {
+      line-height: 1.55;
+      margin: 0.5em 0;
+    }
+
+    pre,
+    :not(pre) > code {
+      font-size: 0.78em;
+    }
+
+    table {
+      font-size: 0.8rem;
+    }
+
+    img {
+      max-width: 100%;
+    }
+
+    .b-hero-title {
+      font-size: 1.6rem;
+    }
+
+    .b-actions {
+      gap: 0.4rem;
+    }
+
+    a.b-btn {
+      min-height: 32px;
+      padding: 0 0.75rem;
+      font-size: 0.62rem;
+    }
+  }
 }
 
 /* ---------- Теги: контурные бейджи, ховер — инверсия ----------------------- */
