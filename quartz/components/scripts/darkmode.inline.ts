@@ -1,6 +1,47 @@
-const userPref = window.matchMedia("(prefers-color-scheme: light)").matches ? "light" : "dark"
-const currentTheme = localStorage.getItem("theme") ?? userPref
-document.documentElement.setAttribute("saved-theme", currentTheme)
+// Лик BOROZDOV (canon §12): система читается один раз при первом визите и сразу
+// сохраняется; дальше решает только переключатель. Слушателя matchMedia change нет.
+// data-theme (obsidian / titan) несёт брендовые токены, saved-theme (dark / light) —
+// внутренний контракт Quartz: на нём держатся base.scss, граф, mermaid, комментарии.
+import { trackGoal } from "./metrika"
+
+type Lik = "obsidian" | "titan"
+
+const THEME_KEY = "borozdov-blog.theme"
+const LEGACY_THEME_KEY = "theme"
+const THEME_COLOR: Record<Lik, string> = { obsidian: "#0d0d0d", titan: "#fafafa" }
+
+const readStoredLik = (): Lik | null => {
+  try {
+    const stored = localStorage.getItem(THEME_KEY)
+    if (stored === "obsidian" || stored === "titan") return stored
+    const legacy = localStorage.getItem(LEGACY_THEME_KEY)
+    if (legacy === "dark") return "obsidian"
+    if (legacy === "light") return "titan"
+  } catch {}
+  return null
+}
+
+const storeLik = (lik: Lik) => {
+  try {
+    localStorage.setItem(THEME_KEY, lik)
+    localStorage.removeItem(LEGACY_THEME_KEY)
+  } catch {}
+}
+
+const applyLik = (lik: Lik) => {
+  const root = document.documentElement
+  root.setAttribute("data-theme", lik)
+  root.setAttribute("saved-theme", lik === "titan" ? "light" : "dark")
+  const meta = document.getElementById("meta-theme-color") as HTMLMetaElement | null
+  if (meta) meta.content = THEME_COLOR[lik]
+}
+
+let initialLik = readStoredLik()
+if (initialLik === null) {
+  initialLik = window.matchMedia("(prefers-color-scheme: light)").matches ? "titan" : "obsidian"
+}
+storeLik(initialLik)
+applyLik(initialLik)
 
 const emitThemeChangeEvent = (theme: "light" | "dark") => {
   const event: CustomEventMap["themechange"] = new CustomEvent("themechange", {
@@ -10,28 +51,24 @@ const emitThemeChangeEvent = (theme: "light" | "dark") => {
 }
 
 document.addEventListener("nav", () => {
-  const switchTheme = () => {
-    const newTheme =
-      document.documentElement.getAttribute("saved-theme") === "dark" ? "light" : "dark"
-    document.documentElement.setAttribute("saved-theme", newTheme)
-    localStorage.setItem("theme", newTheme)
-    emitThemeChangeEvent(newTheme)
-  }
+  // meta theme-color живёт в <head>, а скрипт лика выполняется раньше него
+  applyLik(document.documentElement.getAttribute("data-theme") === "titan" ? "titan" : "obsidian")
 
-  const themeChange = (e: MediaQueryListEvent) => {
-    const newTheme = e.matches ? "dark" : "light"
-    document.documentElement.setAttribute("saved-theme", newTheme)
-    localStorage.setItem("theme", newTheme)
-    emitThemeChangeEvent(newTheme)
+  const switchTheme = () => {
+    const root = document.documentElement
+    const next: Lik = root.getAttribute("data-theme") === "titan" ? "obsidian" : "titan"
+    // Смена лика мгновенна: гасим transition на время смены (canon §12)
+    root.classList.add("theme-switching")
+    applyLik(next)
+    storeLik(next)
+    void root.offsetHeight
+    root.classList.remove("theme-switching")
+    emitThemeChangeEvent(next === "titan" ? "light" : "dark")
+    trackGoal("theme_toggle", { theme: next })
   }
 
   for (const darkmodeButton of document.getElementsByClassName("darkmode")) {
     darkmodeButton.addEventListener("click", switchTheme)
     window.addCleanup(() => darkmodeButton.removeEventListener("click", switchTheme))
   }
-
-  // Listen for changes in prefers-color-scheme
-  const colorSchemeMediaQuery = window.matchMedia("(prefers-color-scheme: dark)")
-  colorSchemeMediaQuery.addEventListener("change", themeChange)
-  window.addCleanup(() => colorSchemeMediaQuery.removeEventListener("change", themeChange))
 })

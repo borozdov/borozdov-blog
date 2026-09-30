@@ -12,44 +12,45 @@ const config: QuartzConfig = {
     pageTitleSuffix: "",
     enableSPA: true,
     enablePopovers: true,
-    analytics: {
-      provider: "plausible",
-    },
+    // Метрика подключена в Head.tsx (canon §26); сторонней аналитики нет
+    analytics: null,
     locale: "ru-RU",
     baseUrl: "blog.borozdov.ru",
     ignorePatterns: ["private", "templates", ".templates", ".attachments", ".obsidian"],
     defaultDateType: "modified",
     theme: {
-      fontOrigin: "googleFonts",
-      cdnCaching: true,
+      // Шрифты — самохостинг (quartz/static/fonts, @font-face в Head.tsx)
+      fontOrigin: "local",
+      cdnCaching: false,
       typography: {
         header: "Inter",
         body: "Inter",
         code: "JetBrains Mono",
       },
-      // BOROZDOV brand: два лика — ТИТАН (light) и ОБСИДИАН (dark), только серая шкала
+      // BOROZDOV: переменные самого Quartz, выраженные через роли бренда (canon §2).
+      // Источник истины — токены в quartz/styles/custom.scss; значения здесь им равны.
       colors: {
         lightMode: {
           light: "#fafafa", // canvas
-          lightgray: "#e4e4e4", // border
+          lightgray: "#e4e4e4", // hairline
           gray: "#6b6b6b", // slate
-          darkgray: "#0d0d0d", // text
-          dark: "#0d0d0d", // text
-          secondary: "#0d0d0d", // ссылки — тот же полюс текста, различаются подчёркиванием
-          tertiary: "#3d3d3d", // soft — ховеры
-          highlight: "rgba(13, 13, 13, 0.05)",
-          textHighlight: "rgba(13, 13, 13, 0.12)",
+          darkgray: "#3d3d3d", // soft — основной текст абзацев
+          dark: "#0d0d0d", // ink — заголовки
+          secondary: "#0d0d0d", // ссылки — тот же полюс, что и текст
+          tertiary: "#8a8a8a", // tertiary
+          highlight: "#ececec", // inset
+          textHighlight: "rgba(13, 13, 13, 0.22)", // focus-ring
         },
         darkMode: {
-          light: "#0d0d0d", // canvas
-          lightgray: "#2e2e2e", // border
-          gray: "#8a8a8a", // slate
-          darkgray: "#fafafa", // text
-          dark: "#fafafa", // text
+          light: "#0d0d0d",
+          lightgray: "#2e2e2e",
+          gray: "#8a8a8a",
+          darkgray: "#d1d1d1",
+          dark: "#fafafa",
           secondary: "#fafafa",
-          tertiary: "#d1d1d1", // soft — ховеры
-          highlight: "rgba(250, 250, 250, 0.06)",
-          textHighlight: "rgba(250, 250, 250, 0.16)",
+          tertiary: "#6b6b6b",
+          highlight: "#121212",
+          textHighlight: "rgba(250, 250, 250, 0.22)",
         },
       },
     },
@@ -60,6 +61,8 @@ const config: QuartzConfig = {
       Plugin.CreatedModifiedDate({
         priority: ["frontmatter", "git", "filesystem"],
       }),
+      // Подсветка только серой шкалой (canon §10.6): цвета Shiki гасятся в syntax.scss,
+      // иерархию токенов несут вес, курсив и прозрачность.
       Plugin.SyntaxHighlighting({
         theme: {
           light: "github-light",
@@ -90,9 +93,6 @@ const config: QuartzConfig = {
       Plugin.Static(),
       Plugin.Favicon(),
       Plugin.NotFoundPage(),
-      Plugin.CustomOgImages({
-        generateFallbackImages: false,
-      }),
     ],
   },
 }

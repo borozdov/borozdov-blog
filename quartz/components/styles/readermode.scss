@@ -1,24 +1,43 @@
+// Кнопка режима чтения — та же геометрия, что у переключателя лика
 .readermode {
   cursor: pointer;
-  padding: 0;
   position: relative;
-  background: none;
-  border: none;
-  width: 20px;
-  height: 32px;
-  margin: 0;
-  text-align: inherit;
   flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  margin: 0;
+  padding: 0;
+  background: transparent;
+  border: 1px solid var(--strong);
+  border-radius: 4px;
+  color: var(--ink);
+  line-height: 1;
+  transition:
+    background 0.15s ease,
+    color 0.15s ease,
+    border-color 0.15s ease;
 
   & svg {
-    position: absolute;
-    width: 20px;
-    height: 20px;
-    top: calc(50% - 10px);
-    fill: var(--darkgray);
-    stroke: var(--darkgray);
-    transition: opacity 0.1s ease;
+    width: 18px;
+    height: 18px;
   }
+
+  @media (hover: hover) {
+    &:hover {
+      background: var(--ink);
+      border-color: var(--ink);
+      color: var(--canvas);
+    }
+  }
+}
+
+:root[reader-mode="on"] .readermode {
+  background: var(--ink);
+  border-color: var(--ink);
+  color: var(--canvas);
 }
 
 :root[reader-mode="on"] {

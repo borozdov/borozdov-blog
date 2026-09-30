@@ -38,7 +38,11 @@ export function createHtmlProcessor(ctx: BuildCtx): QuartzHtmlProcessor {
   return (
     unified()
       // MD AST -> HTML AST
-      .use(remarkRehype, { allowDangerousHtml: true })
+      .use(remarkRehype, {
+        allowDangerousHtml: true,
+        footnoteLabel: "Сноски",
+        footnoteBackLabel: "Вернуться к тексту",
+      })
       // HTML AST -> HTML AST transforms
       .use(transformers.flatMap((plugin) => plugin.htmlPlugins?.(ctx) ?? []))
   )

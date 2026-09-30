@@ -267,13 +267,16 @@ export function renderPage(
   const lang = componentData.fileData.frontmatter?.lang ?? cfg.locale?.split("-")[0] ?? "en"
   const direction = i18n(cfg.locale).direction ?? "ltr"
   const doc = (
-    <html lang={lang} dir={direction}>
+    <html lang={lang} dir={direction} data-theme="obsidian" saved-theme="dark">
       <Head {...componentData} />
       <body data-slug={slug}>
+        <a class="skip-link" href="#main-content">
+          К содержанию
+        </a>
         <div id="quartz-root" class="page">
           <Body {...componentData}>
             {LeftComponent}
-            <div class="center">
+            <div class="center" id="main-content" tabIndex={-1}>
               <div class="page-header">
                 <Header {...componentData}>
                   {header.map((HeaderComponent) => (

@@ -102,6 +102,9 @@ export const ContentIndex: QuartzEmitterPlugin<Partial<Options>> = (opts) => {
       for (const [tree, file] of content) {
         const slug = file.data.slug!
         const date = getDate(ctx.cfg.configuration, file.data) ?? new Date()
+        // noindex-страницы (витрина /kitchen-sink) не попадают ни в sitemap, ни в RSS,
+        // ни в поиск и explorer: страница собирается, но не рекламируется
+        if (file.data.frontmatter?.noindex === true) continue
         if (opts?.includeEmptyFiles || (file.data.text && file.data.text !== "")) {
           linkIndex.set(slug, {
             slug,

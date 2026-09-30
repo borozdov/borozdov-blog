@@ -37,3 +37,6 @@ content/.obsidian/
 # Profiling
 prof/
 *.0x/
+
+# TypeScript incremental cache
+*.tsbuildinfo
