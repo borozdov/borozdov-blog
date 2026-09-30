@@ -1,5 +1,5 @@
 import { i18n } from "../i18n"
-import { FullSlug, joinSegments, pathToRoot } from "../util/path"
+import { FullSlug, canonicalPageUrl, joinSegments, pathToRoot } from "../util/path"
 import { CSSResourceToStyleElement, JSResourceToScriptElement } from "../util/resources"
 import { QuartzComponent, QuartzComponentConstructor, QuartzComponentProps } from "./types"
 import { unescapeHTML } from "../util/escape"
@@ -43,11 +43,10 @@ export default (() => {
 
     // Url of current page
     const socialUrl =
-      fileData.slug === "404" ? url.toString() : joinSegments(url.toString(), fileData.slug!)
+      fileData.slug === "404" ? url.toString() : canonicalPageUrl(cfg.baseUrl!, fileData.slug!)
 
     const ogImagePath = `https://${cfg.baseUrl}/static/og-image.png`
 
-    const canonicalUrl = fileData.slug === "index" ? `${url.toString()}` : socialUrl
     const noindex = fileData.slug === "404" || fileData.frontmatter?.noindex === true
     const jsonLd = JSON.stringify({
       "@context": "https://schema.org",
@@ -66,7 +65,7 @@ export default (() => {
         <meta name="description" content={description} />
         <meta name="author" content="Никита Бороздов" />
         {noindex && <meta name="robots" content="noindex, follow" />}
-        {!noindex && cfg.baseUrl && <link rel="canonical" href={canonicalUrl} />}
+        {!noindex && cfg.baseUrl && <link rel="canonical" href={socialUrl} />}
 
         {/* Шрифты — самохостинг (canon §4.4): @font-face инлайном, preload первого экрана */}
         <link

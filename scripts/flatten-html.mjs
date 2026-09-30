@@ -1,13 +1,12 @@
 // Пост-сборка для Timeweb App Platform (Caddy, SPA fallback выключен).
 //
 // Quartz кладёт страницы в `slug.html`, а ссылается на них без расширения: `/slug`.
-// Caddy не умеет try_files `{path}.html`, а каталог `slug/index.html` отдаёт только
-// после редиректа 308 на `/slug/` — и тогда ломаются относительные пути Quartz.
-// Поэтому страница переезжает в файл без расширения: Caddy отдаёт `/slug` как есть,
-// тип определяет по содержимому (`<!DOCTYPE html>` → text/html).
+// Caddy не умеет try_files `{path}.html`, зато отдаёт каталог `slug/index.html` по
+// `/slug/` (с `/slug` — редирект 308). Поэтому каждая страница переезжает в свой
+// каталог. Ссылки и ассеты Quartz у нас от корня (util/path.ts → pathToRoot), так что
+// лишний уровень URL им не мешает.
 //
 // Не трогаем: `index.html` (индексы каталогов) и `404.html` (его ищет Caddy).
-// Если рядом уже есть каталог с тем же именем — оставляем `.html`, иначе конфликт.
 import fs from "node:fs/promises"
 import path from "node:path"
 
@@ -22,21 +21,23 @@ async function* walk(dir) {
   }
 }
 
-let moved = 0
-const skipped = []
+const pages = []
 for await (const file of walk(root)) {
-  if (!file.endsWith(".html") || KEEP.has(path.basename(file))) continue
-  const target = file.slice(0, -".html".length)
-  const clash = await fs.stat(target).catch(() => null)
-  if (clash) {
+  if (file.endsWith(".html") && !KEEP.has(path.basename(file))) pages.push(file)
+}
+
+const skipped = []
+for (const file of pages) {
+  const target = path.join(file.slice(0, -".html".length), "index.html")
+  if (await fs.stat(target).catch(() => null)) {
     skipped.push(path.relative(root, file))
     continue
   }
+  await fs.mkdir(path.dirname(target), { recursive: true })
   await fs.rename(file, target)
-  moved += 1
 }
 
-console.log(`flatten-html: ${moved} pages moved to extensionless paths`)
+console.log(`flatten-html: ${pages.length - skipped.length} pages moved to slug/index.html`)
 if (skipped.length > 0) {
-  console.warn(`flatten-html: kept .html because of a same-named folder: ${skipped.join(", ")}`)
+  console.warn(`flatten-html: kept .html, folder index already exists: ${skipped.join(", ")}`)
 }

@@ -152,25 +152,27 @@ export function normalizeHastElement(rawEl: HastElement, curBase: FullSlug, newB
   return el
 }
 
-// resolve /a/b/c to ../..
-export function pathToRoot(slug: FullSlug): RelativeURL {
-  let rootPath = slug
-    .split("/")
-    .filter((x) => x !== "")
-    .slice(0, -1)
-    .map((_) => "..")
-    .join("/")
+// Корень сайта для ссылок и ассетов. У Quartz здесь был относительный путь (`../..`),
+// но на Timeweb (Caddy) страница `slug/index.html` открывается по `/slug/` после 308,
+// и глубина URL перестаёт совпадать с глубиной slug. Сайт живёт в корне домена,
+// поэтому ссылки от корня верны на любой глубине и с любым хвостом.
+export function pathToRoot(_slug: FullSlug): RelativeURL {
+  return "/" as RelativeURL
+}
 
-  if (rootPath.length === 0) {
-    rootPath = "."
-  }
-
-  return rootPath as RelativeURL
+// Финальный адрес страницы на хостинге: каталог со слэшем на конце (`/slug/`),
+// тот, что остаётся в адресной строке после 308. Для canonical, og:url, sitemap и RSS.
+export function canonicalPageUrl(baseUrl: string, slug: FullSlug | SimpleSlug): string {
+  const simple = simplifySlug(slug as FullSlug)
+  if (simple === "/") return `https://${stripSlashes(baseUrl)}/`
+  const tail = simple.endsWith("/") ? "" : "/"
+  return `https://${joinSegments(baseUrl, encodeURI(simple))}${tail}`
 }
 
 export function resolveRelative(current: FullSlug, target: FullSlug | SimpleSlug): RelativeURL {
-  const res = joinSegments(pathToRoot(current), simplifySlug(target as FullSlug)) as RelativeURL
-  return res
+  const simple = simplifySlug(target as FullSlug)
+  if (simple === "/") return pathToRoot(current)
+  return joinSegments(pathToRoot(current), simple) as RelativeURL
 }
 
 export function splitAnchor(link: string): [string, string] {
@@ -252,7 +254,8 @@ export function transformLink(src: FullSlug, target: string, opts: TransformOpti
     }
 
     // if it's not unique, then it's the absolute path from the vault root
-    return (joinSegments(pathToRoot(src), canonicalSlug) + folderTail) as RelativeURL
+    const joined = joinSegments(pathToRoot(src), canonicalSlug)
+    return (joined.endsWith("/") ? joined : joined + folderTail) as RelativeURL
   }
 }
 
