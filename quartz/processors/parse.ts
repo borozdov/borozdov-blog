@@ -41,7 +41,29 @@ export function createHtmlProcessor(ctx: BuildCtx): QuartzHtmlProcessor {
       .use(remarkRehype, {
         allowDangerousHtml: true,
         footnoteLabel: "Сноски",
+        footnoteLabelProperties: { className: ["footnotes-label"] },
         footnoteBackLabel: "Вернуться к тексту",
+        // Вместо символа ↩ (на части систем он рисуется эмодзи) — штриховая стрелка вверх
+        footnoteBackContent: () => ({
+          type: "element",
+          tagName: "svg",
+          properties: {
+            viewBox: "0 0 24 24",
+            fill: "none",
+            stroke: "currentColor",
+            "stroke-width": "2.5",
+            "stroke-linecap": "square",
+            "aria-hidden": "true",
+          },
+          children: [
+            {
+              type: "element",
+              tagName: "path",
+              properties: { d: "M12 19V5M5 12l7-7 7 7" },
+              children: [],
+            },
+          ],
+        }),
       })
       // HTML AST -> HTML AST transforms
       .use(transformers.flatMap((plugin) => plugin.htmlPlugins?.(ctx) ?? []))
@@ -106,7 +128,8 @@ export function createFileParser(ctx: BuildCtx, fps: FilePath[]) {
         // base data properties that plugins may use
         file.data.filePath = file.path as FilePath
         file.data.relativePath = path.posix.relative(argv.directory, file.path) as FilePath
-        file.data.slug = slugifyFilePath(file.data.relativePath)
+        const fileSlug = slugifyFilePath(file.data.relativePath)
+        file.data.slug = ctx.slugOverrides?.[fileSlug] ?? fileSlug
 
         const ast = processor.parse(file)
         const newAst = await processor.run(ast, file)
@@ -185,6 +208,7 @@ export async function parseMarkdown(ctx: BuildCtx, fps: FilePath[]): Promise<Pro
       argv: ctx.argv,
       allSlugs: ctx.allSlugs,
       allFiles: ctx.allFiles,
+      slugOverrides: ctx.slugOverrides,
       incremental: ctx.incremental,
     }
 

@@ -9,6 +9,8 @@ properties:
     displayName: Файл
   note.title:
     displayName: Заголовок
+  note.permalink:
+    displayName: Адрес
   note.draft:
     displayName: Черновик
   note.date:
@@ -23,6 +25,7 @@ views:
     order:
       - file.name
       - title
+      - permalink
       - draft
       - date
       - tags

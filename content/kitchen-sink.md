@@ -137,7 +137,7 @@ $$
 
 ## Изображение
 
-![Обложка](attachments/fina-point-cover.png)
+![OG-карточка блога](/static/og-image.png)
 
 ## Компоненты лендинга
 

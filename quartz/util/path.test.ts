@@ -360,3 +360,39 @@ describe("resolveRelative", () => {
     assert.strictEqual(path.resolveRelative("abc/def" as FullSlug, "ghi/" as SimpleSlug), "/ghi/")
   })
 })
+
+describe("permalink", () => {
+  const file = "notes/как-я-тренируюсь" as FullSlug
+
+  test("permalinkSlug", () => {
+    assert.strictEqual(path.permalinkSlug("how-i-train", file), "notes/how-i-train")
+    assert.strictEqual(path.permalinkSlug("/how-i-train/", file), "how-i-train")
+    assert.strictEqual(path.permalinkSlug("How I Train", file), "notes/how-i-train")
+    assert.strictEqual(
+      path.permalinkSlug("https://blog.borozdov.ru/how-i-train/?x=1#top", file),
+      "how-i-train",
+    )
+    assert.strictEqual(path.permalinkSlug("", file), null)
+    assert.strictEqual(path.permalinkSlug(undefined, file), null)
+    assert.strictEqual(path.permalinkSlug("/", file), null)
+  })
+
+  test("links follow the permalink", () => {
+    const opts: TransformOptions = {
+      strategy: "shortest",
+      allSlugs: ["notes/как-я-тренируюсь", "notes/how-i-train", "index"] as FullSlug[],
+      slugOverrides: { "notes/как-я-тренируюсь": "notes/how-i-train" as FullSlug },
+    }
+    const cur = "index" as FullSlug
+    assert.strictEqual(path.transformLink(cur, "Как я тренируюсь", opts), "/notes/how-i-train/")
+    assert.strictEqual(
+      path.transformLink(cur, "Как я тренируюсь#План", opts),
+      "/notes/how-i-train/#план",
+    )
+    assert.strictEqual(path.transformLink(cur, "how-i-train", opts), "/notes/how-i-train/")
+    assert.strictEqual(
+      path.transformLink(cur, "notes/Как я тренируюсь", { ...opts, strategy: "absolute" }),
+      "/notes/how-i-train/",
+    )
+  })
+})

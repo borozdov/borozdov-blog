@@ -29,7 +29,9 @@ export const sharedPageComponents: SharedLayout = {
         title: "Последние заметки",
         limit: 10,
         showTags: true,
-        filter: (f) => f.slug !== "index" && f.frontmatter?.noindex !== true,
+        // Только заметки: без главной, служебных страниц и index.md папок
+        filter: (f) =>
+          f.slug !== "index" && !f.slug!.endsWith("/index") && f.frontmatter?.noindex !== true,
       }),
       condition: (page) => isIndex(page.fileData.slug),
     }),
@@ -46,7 +48,7 @@ export const sharedPageComponents: SharedLayout = {
   footer: Component.Footer({
     links: {
       "borozdov.ru": "https://borozdov.ru",
-      GitHub: "https://github.com/borozdov",
+      Telegram: "https://t.me/borozdov",
       RSS: "/index.xml",
     },
   }),

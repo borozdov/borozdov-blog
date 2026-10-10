@@ -556,6 +556,33 @@ async function renderGraph(graph: HTMLElement, fullSlug: FullSlug) {
   }
 }
 
+// Граф свёрнут, пока читатель его не раскроет; выбор помнится между страницами.
+// Хранилище может быть недоступно (приватный режим) — тогда граф просто свёрнут.
+const GRAPH_OPEN_KEY = "graph-open"
+
+function isGraphOpen(): boolean {
+  try {
+    return localStorage.getItem(GRAPH_OPEN_KEY) === "1"
+  } catch {
+    return false
+  }
+}
+
+function rememberGraphOpen(open: boolean) {
+  try {
+    localStorage.setItem(GRAPH_OPEN_KEY, open ? "1" : "0")
+  } catch {}
+}
+
+function setGraphExpanded(open: boolean) {
+  for (const header of document.querySelectorAll(".graph-header")) {
+    header.classList.toggle("collapsed", !open)
+    header.setAttribute("aria-expanded", String(open))
+    const outer = document.getElementById(header.getAttribute("aria-controls") ?? "")
+    outer?.classList.toggle("collapsed", !open)
+  }
+}
+
 let localGraphCleanups: (() => void)[] = []
 let globalGraphCleanups: (() => void)[] = []
 
@@ -585,9 +612,23 @@ document.addEventListener("nav", async (e: CustomEventMap["nav"]) => {
     }
   }
 
-  await renderLocalGraph()
+  setGraphExpanded(isGraphOpen())
+  if (isGraphOpen()) await renderLocalGraph()
+
+  const toggleLocalGraph = () => {
+    const open = !isGraphOpen()
+    rememberGraphOpen(open)
+    setGraphExpanded(open)
+    if (open) void renderLocalGraph()
+    else cleanupLocalGraphs()
+  }
+  for (const header of document.querySelectorAll(".graph-header")) {
+    header.addEventListener("click", toggleLocalGraph)
+    window.addCleanup(() => header.removeEventListener("click", toggleLocalGraph))
+  }
+
   const handleThemeChange = () => {
-    void renderLocalGraph()
+    if (isGraphOpen()) void renderLocalGraph()
   }
 
   document.addEventListener("themechange", handleThemeChange)

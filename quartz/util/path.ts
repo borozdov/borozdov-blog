@@ -236,6 +236,31 @@ export function getAllSegmentPrefixes(tags: string): string[] {
 export interface TransformOptions {
   strategy: "absolute" | "relative" | "shortest"
   allSlugs: FullSlug[]
+  // Адрес из свойства `permalink`: slug по пути файла → slug страницы (см. permalinkSlug)
+  slugOverrides?: Record<string, FullSlug>
+}
+
+// `permalink` из свойств заметки → её slug. Имя файла в Obsidian может быть любым,
+// адрес задаёт свойство: `how-i-train` — рядом с файлом (в той же папке),
+// `/how-i-train` — от корня сайта. Полный URL, слэши по краям, ?query и #якорь
+// отбрасываются. Пустое значение — адрес по имени файла (null).
+export function permalinkSlug(value: unknown, fileSlug: FullSlug): FullSlug | null {
+  let raw = String(value ?? "").trim()
+  let absolute = raw.startsWith("/")
+  try {
+    raw = new URL(raw).pathname
+    absolute = true
+  } catch {}
+  try {
+    raw = decodeURI(raw)
+  } catch {}
+
+  const target = stripSlashes(raw.split(/[?#]/, 1)[0]).replace(/\/+$/, "")
+  if (target === "") return null
+
+  const folder = fileSlug.split("/").slice(0, -1)
+  const fp = absolute ? target : joinSegments(...folder, target)
+  return slugifyFilePath(`${fp}.md` as FilePath)
 }
 
 export function transformLink(src: FullSlug, target: string, opts: TransformOptions): RelativeURL {
@@ -258,9 +283,15 @@ export function transformLink(src: FullSlug, target: string, opts: TransformOpti
 
       // only match, just use it
       if (matchingFileNames.length === 1) {
-        const targetSlug = matchingFileNames[0]
+        const targetSlug = opts.slugOverrides?.[matchingFileNames[0]] ?? matchingFileNames[0]
         return (resolveRelative(src, targetSlug) + targetAnchor) as RelativeURL
       }
+    }
+
+    // ссылка по полному пути на заметку со своим permalink
+    const overridden = opts.slugOverrides?.[targetCanonical]
+    if (overridden) {
+      return (resolveRelative(src, overridden) + targetAnchor) as RelativeURL
     }
 
     // if it's not unique, then it's the absolute path from the vault root

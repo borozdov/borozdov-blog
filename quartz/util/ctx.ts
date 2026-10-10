@@ -27,6 +27,8 @@ export interface BuildCtx {
   cfg: QuartzConfig
   allSlugs: FullSlug[]
   allFiles: FilePath[]
+  // slug по пути файла → slug из свойства permalink (util/permalink.ts)
+  slugOverrides?: Record<string, FullSlug>
   trie?: FileTrieNode<BuildTimeTrieData>
   incremental: boolean
 }

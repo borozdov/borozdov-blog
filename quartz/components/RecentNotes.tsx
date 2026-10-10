@@ -55,7 +55,7 @@ export default ((userOpts?: Partial<Options>) => {
                       </a>
                     </h3>
                   </div>
-                  {page.dates && (
+                  {page.dates && page.frontmatter?.created && (
                     <p class="meta">
                       <Date date={getDate(cfg, page)!} locale={cfg.locale} />
                     </p>
