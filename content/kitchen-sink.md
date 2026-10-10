@@ -1,11 +1,19 @@
 ---
-title: Kitchen sink
-description: Витрина примитивов блога — служебная страница, закрыта от индекса.
-noindex: true
-comments: false
+title: Test
+permalink: kitchen-sink
+description: Описание
+date: 2026-10-10
+updated: 2026-10-16
 tags:
-  - витрина
-  - бренд
+  - test
+draft: false
+telegram_discussion: ""
+comments: false
+enableToc: true
+noindex: false
+aliases: []
+socialDescription: ""
+cssclasses: []
 ---
 
 Служебная страница (canon §11): здесь собран каждый элемент Markdown, который умеет блог. При правке стиля смотри сюда в обоих ликах, а не обходи заметки вручную.
