@@ -219,6 +219,24 @@ function renderTranscludes(
   })
 }
 
+// Файлы называются по-английски (это адрес), заголовок заметки — `title` по-русски.
+// Вики-ссылка без алиаса `[[how-this-works]]` показывает title целевой заметки, как
+// проводник, поиск и обратные ссылки. Ссылки с алиасом или якорем не трогаем.
+function renderWikilinkTitles(root: Root, componentData: QuartzComponentProps) {
+  visit(root, "element", (node) => {
+    if (node.tagName !== "a" || !node.properties) return
+    const noAlias = node.properties["data-noalias"] ?? node.properties.dataNoalias
+    if (noAlias === undefined) return
+    delete node.properties["data-noalias"]
+    delete node.properties.dataNoalias
+
+    const targetSlug = node.properties["data-slug"] ?? node.properties.dataSlug
+    const target = componentData.allFiles.find((file) => file.slug === targetSlug)
+    const title = target?.frontmatter?.title
+    if (title) node.children = [{ type: "text", value: title }]
+  })
+}
+
 export function renderPage(
   cfg: GlobalConfiguration,
   slug: FullSlug,
@@ -231,6 +249,7 @@ export function renderPage(
   const root = clone(componentData.tree) as Root
   const visited = new Set<FullSlug>([slug])
   renderTranscludes(root, cfg, slug, componentData, visited)
+  renderWikilinkTitles(root, componentData)
 
   // set componentData.tree to the edited html that has transclusions rendered
   componentData.tree = root

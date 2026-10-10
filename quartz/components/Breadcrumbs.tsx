@@ -49,6 +49,7 @@ export default ((opts?: Partial<BreadcrumbOptions>) => {
     allFiles,
     displayClass,
     ctx,
+    cfg,
   }: QuartzComponentProps) => {
     const trie = (ctx.trie ??= trieFromAllFiles(allFiles))
     const slugParts = fileData.slug!.split("/")
@@ -76,8 +77,24 @@ export default ((opts?: Partial<BreadcrumbOptions>) => {
       crumbs.pop()
     }
 
+    // Крошки и показаны, и размечены (canon §25.2): BreadcrumbList читают оба движка.
+    // У последнего элемента нет item — это текущая страница.
+    const jsonLd = JSON.stringify({
+      "@context": "https://schema.org",
+      "@type": "BreadcrumbList",
+      itemListElement: crumbs.map((crumb, index) => ({
+        "@type": "ListItem",
+        position: index + 1,
+        name: crumb.displayName,
+        ...(crumb.path ? { item: `https://${cfg.baseUrl}${encodeURI(crumb.path)}` } : {}),
+      })),
+    })
+
     return (
       <nav class={classNames(displayClass, "breadcrumb-container")} aria-label="breadcrumbs">
+        {cfg.baseUrl && crumbs.length > 1 && (
+          <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: jsonLd }} />
+        )}
         {crumbs.map((crumb, index) => (
           <div class="breadcrumb-element">
             <a href={crumb.path}>{crumb.displayName}</a>

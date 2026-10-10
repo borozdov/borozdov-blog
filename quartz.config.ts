@@ -9,15 +9,19 @@ import * as Plugin from "./quartz/plugins"
 const config: QuartzConfig = {
   configuration: {
     pageTitle: "BOROZDOV",
-    pageTitleSuffix: "",
+    pageTitleSuffix: " | BOROZDOV",
     enableSPA: true,
     enablePopovers: true,
     // Метрика подключена в Head.tsx (canon §26); сторонней аналитики нет
     analytics: null,
     locale: "ru-RU",
     baseUrl: "blog.borozdov.ru",
-    ignorePatterns: ["private", "templates", ".templates", ".attachments", ".obsidian"],
-    defaultDateType: "modified",
+    // private/ — служебные заметки хранилища, templates/ — шаблоны Obsidian; на любой
+    // глубине. Bases и Canvas сайт не рисует, иначе они уехали бы как сырые файлы.
+    ignorePatterns: ["**/private", "**/templates", "**/*.base", "**/*.canvas", ".obsidian"],
+    // Дата заметки — `date` из frontmatter. На Timeweb сборка идёт без истории git, и без
+    // `date` страница получила бы время сборки.
+    defaultDateType: "created",
     theme: {
       // Шрифты — самохостинг (quartz/static/fonts, @font-face в Head.tsx)
       fontOrigin: "local",
@@ -92,6 +96,7 @@ const config: QuartzConfig = {
       Plugin.Assets(),
       Plugin.Static(),
       Plugin.Favicon(),
+      Plugin.Robots(),
       Plugin.NotFoundPage(),
     ],
   },

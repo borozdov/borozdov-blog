@@ -295,6 +295,10 @@ export const ObsidianFlavoredMarkdown: QuartzTransformerPlugin<Partial<Options>>
                 return {
                   type: "link",
                   url,
+                  // [[file-name]] без алиаса: при рендере текст заменится на title заметки
+                  ...(alias === undefined && !anchor
+                    ? { data: { hProperties: { "data-noalias": true } } }
+                    : {}),
                   children: [
                     {
                       type: "text",

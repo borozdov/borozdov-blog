@@ -29,7 +29,9 @@ export default ((opts?: Partial<ContentMetaOptions>) => {
     if (text) {
       const segments: (string | JSX.Element)[] = []
 
-      if (fileData.dates) {
+      // Дату показываем, только если она есть во frontmatter (`date`): на Timeweb сборка
+      // идёт без git, и иначе страница получила бы время сборки
+      if (fileData.dates && fileData.frontmatter?.created) {
         segments.push(<Date date={getDate(cfg, fileData)!} locale={cfg.locale} />)
       }
 

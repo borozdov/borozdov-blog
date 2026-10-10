@@ -116,8 +116,15 @@ export const CrawlLinks: QuartzTransformerPlugin<Partial<Options>> = (userOpts) 
                   const url = new URL(dest, "https://base.com/" + stripSlashes(curSlug, true))
                   const canonicalDest = url.pathname
                   let [destCanonical, _destAnchor] = splitAnchor(canonicalDest)
+                  // Страницы мы ссылаем со слэшем (`/slug/`, см. resolveRelative), поэтому
+                  // слэш на конце значит папку, только если страницы с таким slug нет
                   if (destCanonical.endsWith("/")) {
-                    destCanonical += "index"
+                    const asPage = decodeURIComponent(
+                      stripSlashes(destCanonical.slice(0, -1), true),
+                    ) as FullSlug
+                    destCanonical = transformOptions.allSlugs.includes(asPage)
+                      ? destCanonical.slice(0, -1)
+                      : destCanonical + "index"
                   }
 
                   // need to decodeURIComponent here as WHATWG URL percent-encodes everything

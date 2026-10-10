@@ -12,6 +12,13 @@ const siteHeader = [
   Component.DesktopOnly(Component.ReaderMode()),
 ]
 
+// Проводник: служебная витрина /kitchen-sink открывается только по прямой ссылке
+const explorer = Component.Explorer({
+  title: "Разделы",
+  folderDefaultState: "open",
+  filterFn: (node) => node.slugSegment !== "tags" && node.slugSegment !== "kitchen-sink",
+})
+
 // components shared across all pages
 export const sharedPageComponents: SharedLayout = {
   head: Component.Head(),
@@ -22,13 +29,16 @@ export const sharedPageComponents: SharedLayout = {
         title: "Последние заметки",
         limit: 10,
         showTags: true,
-        filter: (f) => f.slug !== "index" && f.slug !== "kitchen-sink",
+        filter: (f) => f.slug !== "index" && f.frontmatter?.noindex !== true,
       }),
       condition: (page) => isIndex(page.fileData.slug),
     }),
+    // Комментарии — обсуждение поста в @BorozdovBlog. Ссылка на пост лежит в заметке:
+    // telegram_discussion: https://t.me/BorozdovBlog/123 (или просто 123)
     Component.Comments({
       provider: "telegram",
       options: {
+        channel: "BorozdovBlog",
         commentsLimit: 10,
       },
     }),
@@ -53,7 +63,7 @@ export const defaultContentPageLayout: PageLayout = {
     Component.ContentMeta({ showComma: false }),
     Component.TagList(),
   ],
-  left: [Component.Explorer({ title: "Разделы", folderDefaultState: "open" })],
+  left: [explorer],
   right: [
     Component.DesktopOnly(Component.TableOfContents()),
     Component.Graph({
@@ -71,7 +81,7 @@ export const defaultListPageLayout: PageLayout = {
     Component.ArticleTitle(),
     Component.ContentMeta({ showComma: false }),
   ],
-  left: [Component.Explorer({ title: "Разделы", folderDefaultState: "open" })],
+  left: [explorer],
   // Страницы папок и тегов не входят в граф — правая колонка пустая
   right: [],
 }

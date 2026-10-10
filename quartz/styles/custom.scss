@@ -294,6 +294,13 @@ time,
   text-transform: uppercase;
 }
 
+/* Дата и время чтения разделены косой чертой, как крошки (без неё они слипались) */
+.content-meta[show-comma="false"] > *:not(:last-child)::after {
+  content: "/";
+  margin: 0 0.6em;
+  color: var(--tertiary);
+}
+
 table,
 .katex {
   font-variant-numeric: tabular-nums;
@@ -598,6 +605,30 @@ html:root {
   margin-top: 4rem;
 }
 
+/* Комментарии из Telegram: блок под статьёй за волосяной линией. Ярлык — как у
+   виджетов, ссылка на пост — запасной путь, если telegram.org не загрузился. */
+.telegram-comments {
+  padding-top: 1.5rem;
+  border-top: 1px solid var(--hairline);
+}
+
+.telegram-comments__head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 1.25rem;
+}
+
+.page-footer a.telegram-comments__link {
+  font-size: 0.8rem;
+}
+
+.telegram-comments-widget iframe {
+  display: block;
+  max-width: 100%;
+}
+
 /* Заголовки виджетов — лейблы */
 .sidebar h2,
 .sidebar h3,
@@ -605,7 +636,8 @@ html:root {
 .toc > .toc-header h3,
 .backlinks > h3,
 .graph > h3,
-.recent-notes > h3 {
+.recent-notes > h3,
+.telegram-comments__title {
   margin: 0;
   color: var(--slate);
   text-transform: uppercase;

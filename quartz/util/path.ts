@@ -54,11 +54,14 @@ export function getFullSlug(window: Window): FullSlug {
   return res
 }
 
+// Нижний регистр: файлы называются по-английски, и `How This Works.md` открывается
+// по `/how-this-works/`. Ссылки, ассеты и теги проходят через эту же функцию.
 function sluggify(s: string): string {
   return s
     .split("/")
     .map((segment) =>
       segment
+        .toLowerCase()
         .replace(/\s/g, "-")
         .replace(/&/g, "-and-")
         .replace(/%/g, "-percent")
@@ -169,10 +172,17 @@ export function canonicalPageUrl(baseUrl: string, slug: FullSlug | SimpleSlug): 
   return `https://${joinSegments(baseUrl, encodeURI(simple))}${tail}`
 }
 
+// Страницы живут в каталогах (`/slug/`), поэтому ссылка на страницу сразу идёт со слэшем:
+// без него Caddy отвечает 308, а SPA считает `/slug` и `/slug/` разными адресами.
+// Ассеты (`img.png`) остаются как есть.
+function withPageTail(url: string): string {
+  return url.endsWith("/") || _hasFileExtension(url) ? url : url + "/"
+}
+
 export function resolveRelative(current: FullSlug, target: FullSlug | SimpleSlug): RelativeURL {
   const simple = simplifySlug(target as FullSlug)
   if (simple === "/") return pathToRoot(current)
-  return joinSegments(pathToRoot(current), simple) as RelativeURL
+  return withPageTail(joinSegments(pathToRoot(current), simple)) as RelativeURL
 }
 
 export function splitAnchor(link: string): [string, string] {
@@ -254,8 +264,9 @@ export function transformLink(src: FullSlug, target: string, opts: TransformOpti
     }
 
     // if it's not unique, then it's the absolute path from the vault root
-    const joined = joinSegments(pathToRoot(src), canonicalSlug)
-    return (joined.endsWith("/") ? joined : joined + folderTail) as RelativeURL
+    const joined = joinSegments(pathToRoot(src), targetCanonical)
+    return ((joined.endsWith("/") ? joined : withPageTail(joined + folderTail)) +
+      targetAnchor) as RelativeURL
   }
 }
 

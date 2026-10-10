@@ -27,9 +27,10 @@ function nonEmptyString(value: unknown): string | undefined {
 
 export default (() => {
   const Head: QuartzComponent = ({ cfg, fileData, externalResources }: QuartzComponentProps) => {
-    const titleSuffix = cfg.pageTitleSuffix ?? ""
-    const title =
-      (fileData.frontmatter?.title ?? i18n(cfg.locale).propertyDefaults.title) + titleSuffix
+    // В <title> к заголовку заметки дописывается « | BOROZDOV» (canon §25.1); у главной
+    // заголовок и есть имя сайта. В og:title суффикса нет — имя сайта там в og:site_name.
+    const title = fileData.frontmatter?.title ?? i18n(cfg.locale).propertyDefaults.title
+    const documentTitle = title === cfg.pageTitle ? title : title + (cfg.pageTitleSuffix ?? "")
     const description =
       nonEmptyString(fileData.frontmatter?.socialDescription) ??
       nonEmptyString(fileData.frontmatter?.description) ??
@@ -48,20 +49,23 @@ export default (() => {
     const ogImagePath = `https://${cfg.baseUrl}/static/og-image.png`
 
     const noindex = fileData.slug === "404" || fileData.frontmatter?.noindex === true
-    const jsonLd = JSON.stringify({
-      "@context": "https://schema.org",
-      "@type": "WebSite",
-      name: cfg.pageTitle,
-      url: url.toString(),
-      inLanguage: "ru",
-      author: { "@type": "Person", name: "Никита Бороздов", url: "https://borozdov.ru/" },
-    })
+    // WebSite — только на главной (canon §25.2); крошки размечает Breadcrumbs
+    const jsonLd =
+      fileData.slug === "index" &&
+      JSON.stringify({
+        "@context": "https://schema.org",
+        "@type": "WebSite",
+        name: cfg.pageTitle,
+        url: url.toString(),
+        inLanguage: "ru",
+        author: { "@type": "Person", name: "Никита Бороздов", url: "https://borozdov.ru/" },
+      })
 
     return (
       <head>
         <meta charSet="utf-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
-        <title>{title}</title>
+        <title>{documentTitle}</title>
         <meta name="description" content={description} />
         <meta name="author" content="Никита Бороздов" />
         {noindex && <meta name="robots" content="noindex, follow" />}
@@ -119,10 +123,11 @@ export default (() => {
           </>
         )}
 
-        {/* Иконки бренда (canon §19): .ico первым и с sizes */}
-        <link rel="icon" href="/favicon.ico" sizes="48x48" />
-        <link rel="icon" type="image/png" sizes="120x120" href="/static/favicon-120.png" />
-        <link rel="apple-touch-icon" href="/static/apple-touch-icon.png" />
+        {/* Иконки бренда (canon §19.9): .ico первым и с sizes, все файлы в корне.
+            type обязателен для Яндекса: он должен совпадать с форматом файла. */}
+        <link rel="icon" type="image/x-icon" href="/favicon.ico" sizes="48x48" />
+        <link rel="icon" type="image/png" sizes="120x120" href="/favicon-120.png" />
+        <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
         <link rel="manifest" href="/static/site.webmanifest" />
 
         {/* Один тег с id: лик выбирает переключатель (canon §12.4) */}
@@ -137,7 +142,9 @@ export default (() => {
         <meta name="referrer" content="strict-origin-when-cross-origin" />
         <meta name="generator" content="Quartz" />
 
-        <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: jsonLd }} />
+        {jsonLd && (
+          <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: jsonLd }} />
+        )}
 
         <link rel="preconnect" href="https://mc.yandex.ru" />
         <script data-persist dangerouslySetInnerHTML={{ __html: metrikaScript(METRIKA_ID) }} />

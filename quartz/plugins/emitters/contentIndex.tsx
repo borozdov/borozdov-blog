@@ -25,6 +25,9 @@ export type ContentDetails = {
   content: string
   richContent?: string
   date?: Date
+  // Дата последней правки для <lastmod> в sitemap: `updated`, иначе `date`. Без даты во
+  // frontmatter <lastmod> не пишем: время сборки поисковику только вредит
+  lastmod?: Date
   description?: string
   noindex?: boolean
 }
@@ -51,7 +54,7 @@ function generateSiteMap(cfg: GlobalConfiguration, idx: ContentIndexMap): string
   const base = cfg.baseUrl ?? ""
   const createURLEntry = (slug: SimpleSlug, content: ContentDetails): string => `<url>
     <loc>${canonicalPageUrl(base, slug)}</loc>
-    ${content.date && `<lastmod>${content.date.toISOString()}</lastmod>`}
+    ${content.lastmod ? `<lastmod>${content.lastmod.toISOString()}</lastmod>` : ""}
   </url>`
   const urls = Array.from(idx)
     .filter(([, content]) => !content.noindex)
@@ -124,6 +127,7 @@ export const ContentIndex: QuartzEmitterPlugin<Partial<Options>> = (opts) => {
               ? escapeHTML(toHtml(tree as Root, { allowDangerousHtml: true }))
               : undefined,
             date: date,
+            lastmod: file.data.frontmatter?.created ? file.data.dates?.modified : undefined,
             description: file.data.description ?? "",
             // noindex-страницы (витрина /kitchen-sink) видны в проводнике, графе и поиске,
             // но не попадают в sitemap и RSS
@@ -158,6 +162,7 @@ export const ContentIndex: QuartzEmitterPlugin<Partial<Options>> = (opts) => {
           // for the RSS feed
           delete content.description
           delete content.date
+          delete content.lastmod
           delete content.noindex
           return [slug, content]
         }),
