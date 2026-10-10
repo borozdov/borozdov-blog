@@ -1,0 +1,60 @@
+filters:
+  and:
+    - file.ext == "md"
+    - not:
+        - file.inFolder("templates")
+        - file.inFolder("private")
+properties:
+  file.name:
+    displayName: Файл
+  note.title:
+    displayName: Заголовок
+  note.draft:
+    displayName: Черновик
+  note.date:
+    displayName: Дата
+  note.tags:
+    displayName: Теги
+  note.telegram_discussion:
+    displayName: Пост в Telegram
+views:
+  - type: table
+    name: Все
+    order:
+      - file.name
+      - title
+      - draft
+      - date
+      - tags
+      - telegram_discussion
+    sort:
+      - property: date
+        direction: DESC
+  - type: table
+    name: Черновики
+    filters:
+      and:
+        - draft == true
+    order:
+      - file.name
+      - title
+      - date
+    sort:
+      - property: file.mtime
+        direction: DESC
+  - type: table
+    name: Без комментариев
+    filters:
+      and:
+        - draft != true
+        - comments != false
+        - '!telegram_discussion'
+        - file.name != "index"
+    order:
+      - file.name
+      - title
+      - date
+      - telegram_discussion
+    sort:
+      - property: date
+        direction: DESC
