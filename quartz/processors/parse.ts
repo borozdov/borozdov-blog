@@ -43,26 +43,10 @@ export function createHtmlProcessor(ctx: BuildCtx): QuartzHtmlProcessor {
         footnoteLabel: "Сноски",
         footnoteLabelProperties: { className: ["footnotes-label"] },
         footnoteBackLabel: "Вернуться к тексту",
-        // Вместо символа ↩ (на части систем он рисуется эмодзи) — штриховая стрелка вверх
-        footnoteBackContent: () => ({
-          type: "element",
-          tagName: "svg",
-          properties: {
-            viewBox: "0 0 24 24",
-            fill: "none",
-            stroke: "currentColor",
-            "stroke-width": "2.5",
-            "stroke-linecap": "square",
-            "aria-hidden": "true",
-          },
-          children: [
-            {
-              type: "element",
-              tagName: "path",
-              properties: { d: "M12 19V5M5 12l7-7 7 7" },
-              children: [],
-            },
-          ],
+        // Без символа ↩: возврат к тексту — сам номер сноски слева (стили в custom.scss)
+        footnoteBackContent: (referenceIndex) => ({
+          type: "text",
+          value: String(referenceIndex + 1),
         }),
       })
       // HTML AST -> HTML AST transforms

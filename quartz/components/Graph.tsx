@@ -2,7 +2,6 @@ import { QuartzComponent, QuartzComponentConstructor, QuartzComponentProps } fro
 // @ts-ignore
 import script from "./scripts/graph.inline"
 import style from "./styles/graph.scss"
-import { i18n } from "../i18n"
 import { classNames } from "../util/lang"
 
 export interface D3Config {
@@ -59,59 +58,34 @@ const defaultOptions: GraphOptions = {
   },
 }
 
-let numGraphs = 0
-
 export default ((opts?: Partial<GraphOptions>) => {
-  const Graph: QuartzComponent = ({ displayClass, cfg }: QuartzComponentProps) => {
-    const localGraph = { ...defaultOptions.localGraph, ...opts?.localGraph }
+  // Граф открывается кнопкой в шапке, во всплывающем окне: отдельной панели под него нет.
+  // ⌘G / Ctrl+G открывает и закрывает его с клавиатуры.
+  const Graph: QuartzComponent = ({ displayClass }: QuartzComponentProps) => {
     const globalGraph = { ...defaultOptions.globalGraph, ...opts?.globalGraph }
-    const id = `graph-${numGraphs++}`
-    // Граф свёрнут до заголовка и рисуется только после раскрытия (graph.inline.ts)
     return (
       <div class={classNames(displayClass, "graph")}>
         <button
+          class="graph-button global-graph-icon"
           type="button"
-          class="graph-header collapsed"
-          aria-controls={id}
-          aria-expanded="false"
+          aria-label="Граф связей"
+          title="Граф связей · ⌘G"
         >
-          <h3>{i18n(cfg.locale).components.graph.title}</h3>
           <svg
             aria-hidden="true"
             xmlns="http://www.w3.org/2000/svg"
-            width="14"
-            height="14"
             viewBox="0 0 24 24"
             fill="none"
             stroke="currentColor"
-            stroke-width="2.5"
+            stroke-width="2"
             stroke-linecap="square"
-            class="fold"
           >
-            <path d="M6 9l6 6 6-6" />
+            <circle cx="6" cy="6" r="2.5" />
+            <circle cx="18" cy="9" r="2.5" />
+            <circle cx="10" cy="18" r="2.5" />
+            <path d="M8.4 6.6l7.2 1.8M6.8 8.4l2.4 7.2M16.3 10.9l-4.6 5.2" />
           </svg>
         </button>
-        <div class="graph-outer collapsed" id={id}>
-          <div class="graph-container" data-cfg={JSON.stringify(localGraph)}></div>
-          <button
-            class="global-graph-icon"
-            type="button"
-            aria-label="Граф всех заметок"
-            title="Все связи"
-          >
-            <svg
-              aria-hidden="true"
-              xmlns="http://www.w3.org/2000/svg"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              stroke-width="2"
-              stroke-linecap="square"
-            >
-              <path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5" />
-            </svg>
-          </button>
-        </div>
         <div class="global-graph-outer">
           <div class="global-graph-container" data-cfg={JSON.stringify(globalGraph)}></div>
         </div>

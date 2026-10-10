@@ -556,42 +556,7 @@ async function renderGraph(graph: HTMLElement, fullSlug: FullSlug) {
   }
 }
 
-// Граф свёрнут, пока читатель его не раскроет; выбор помнится между страницами.
-// Хранилище может быть недоступно (приватный режим) — тогда граф просто свёрнут.
-const GRAPH_OPEN_KEY = "graph-open"
-
-function isGraphOpen(): boolean {
-  try {
-    return localStorage.getItem(GRAPH_OPEN_KEY) === "1"
-  } catch {
-    return false
-  }
-}
-
-function rememberGraphOpen(open: boolean) {
-  try {
-    localStorage.setItem(GRAPH_OPEN_KEY, open ? "1" : "0")
-  } catch {}
-}
-
-function setGraphExpanded(open: boolean) {
-  for (const header of document.querySelectorAll(".graph-header")) {
-    header.classList.toggle("collapsed", !open)
-    header.setAttribute("aria-expanded", String(open))
-    const outer = document.getElementById(header.getAttribute("aria-controls") ?? "")
-    outer?.classList.toggle("collapsed", !open)
-  }
-}
-
-let localGraphCleanups: (() => void)[] = []
 let globalGraphCleanups: (() => void)[] = []
-
-function cleanupLocalGraphs() {
-  for (const cleanup of localGraphCleanups) {
-    cleanup()
-  }
-  localGraphCleanups = []
-}
 
 function cleanupGlobalGraphs() {
   for (const cleanup of globalGraphCleanups) {
@@ -604,38 +569,7 @@ document.addEventListener("nav", async (e: CustomEventMap["nav"]) => {
   const slug = e.detail.url
   addToVisited(simplifySlug(slug))
 
-  async function renderLocalGraph() {
-    cleanupLocalGraphs()
-    const localGraphContainers = document.getElementsByClassName("graph-container")
-    for (const container of localGraphContainers) {
-      localGraphCleanups.push(await renderGraph(container as HTMLElement, slug))
-    }
-  }
-
-  setGraphExpanded(isGraphOpen())
-  if (isGraphOpen()) await renderLocalGraph()
-
-  const toggleLocalGraph = () => {
-    const open = !isGraphOpen()
-    rememberGraphOpen(open)
-    setGraphExpanded(open)
-    if (open) void renderLocalGraph()
-    else cleanupLocalGraphs()
-  }
-  for (const header of document.querySelectorAll(".graph-header")) {
-    header.addEventListener("click", toggleLocalGraph)
-    window.addCleanup(() => header.removeEventListener("click", toggleLocalGraph))
-  }
-
-  const handleThemeChange = () => {
-    if (isGraphOpen()) void renderLocalGraph()
-  }
-
-  document.addEventListener("themechange", handleThemeChange)
-  window.addCleanup(() => {
-    document.removeEventListener("themechange", handleThemeChange)
-  })
-
+  // Граф живёт только во всплывающем окне: его открывает кнопка в шапке (Graph.tsx)
   const containers = [...document.getElementsByClassName("global-graph-outer")] as HTMLElement[]
   async function renderGlobalGraph() {
     const slug = getFullSlug(window)
@@ -684,7 +618,6 @@ document.addEventListener("nav", async (e: CustomEventMap["nav"]) => {
   document.addEventListener("keydown", shortcutHandler)
   window.addCleanup(() => {
     document.removeEventListener("keydown", shortcutHandler)
-    cleanupLocalGraphs()
     cleanupGlobalGraphs()
   })
 })

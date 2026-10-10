@@ -173,6 +173,7 @@ button {
 
 .darkmode:focus-visible,
 .readermode:focus-visible,
+.graph-button:focus-visible,
 .b-btn:focus-visible,
 .b-card-cta:focus-visible {
   border-radius: 4px;
@@ -492,6 +493,8 @@ html:root {
 
 /* Кнопка поиска в шапке: поле с подсказкой клавиш */
 .site-header .search {
+  /* Ширина — по кнопке: иначе Quartz растягивает блок и справа появляется дыра */
+  flex: 0 0 auto;
   max-width: none;
   min-width: 0;
 
@@ -635,7 +638,6 @@ html:root {
 .explorer .title-button h2,
 .toc > .toc-header h3,
 .backlinks > h3,
-.graph > .graph-header h3,
 .recent-notes > h3,
 .telegram-comments__title {
   margin: 0;
@@ -935,67 +937,35 @@ html:root {
   }
 }
 
-/* ---------- Граф связей ---------------------------------------------------- */
+/* ---------- Граф связей ----------------------------------------------------
+   Кнопка в шапке рядом с ликом, той же формы; граф — во всплывающем окне.
+   -------------------------------------------------------------------------- */
 
-.graph {
-  /* Заголовок — кнопка раскрытия, как у оглавления; граф свёрнут по умолчанию */
-  & > .graph-header {
-    display: flex;
+.site-header .graph {
+  display: flex;
+  flex-shrink: 0;
+
+  & > .graph-button {
+    display: inline-flex;
     align-items: center;
-    gap: 0.5rem;
-    padding: 0;
-    background: none;
-    border: none;
-    text-align: left;
-    cursor: pointer;
-
-    & .fold {
-      color: var(--tertiary);
-      transition: transform 0.15s ease;
-    }
-
-    &.collapsed .fold {
-      transform: rotateZ(-90deg);
-    }
-
-    &:not(.collapsed) {
-      margin-bottom: 0.9rem;
-    }
-  }
-
-  & > .graph-outer.collapsed {
-    display: none;
-  }
-
-  & > .graph-outer {
-    height: 260px;
+    justify-content: center;
+    width: 36px;
+    height: 36px;
     margin: 0;
-    background: var(--surface);
-    border: 1px solid var(--hairline);
-    border-radius: 8px;
+    padding: 0;
+    background: transparent;
+    border: 1px solid var(--strong);
+    border-radius: 4px;
+    color: var(--ink);
+    cursor: pointer;
+    transition:
+      background 0.15s ease,
+      color 0.15s ease,
+      border-color 0.15s ease;
 
-    & > .global-graph-icon {
-      width: 30px;
-      height: 30px;
-      margin: 0.5rem;
-      padding: 0;
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      color: var(--slate);
-      background: var(--surface);
-      border: 1px solid var(--hairline);
-      border-radius: 4px;
-      opacity: 1;
-      transition:
-        background 0.15s ease,
-        color 0.15s ease,
-        border-color 0.15s ease;
-
-      & > svg {
-        width: 15px;
-        height: 15px;
-      }
+    & > svg {
+      width: 18px;
+      height: 18px;
     }
   }
 
@@ -1015,7 +985,7 @@ html:root {
 }
 
 @media (hover: hover) {
-  .graph > .graph-outer > .global-graph-icon:hover {
+  .site-header .graph > .graph-button:hover {
     background: var(--ink);
     border-color: var(--ink);
     color: var(--canvas);
@@ -1559,15 +1529,16 @@ li:has(> input[type="checkbox"]:checked) {
 }
 
 /* ---------- Сноски --------------------------------------------------------
-   Метка в тексте — моно-цифра в hairline-рамке, как тег; ховер — инверсия.
-   Блок внизу — ярлык «Сноски», моно-номера, стрелка «назад» той же рамкой.
+   Метка в тексте и номер внизу — одна и та же моно-цифра в hairline-рамке,
+   ховер — инверсия. Номер внизу и есть ссылка обратно к тексту: стрелок нет.
    -------------------------------------------------------------------------- */
 
 article sup:has(> a[data-footnote-ref]) {
   line-height: 0;
 }
 
-article sup > a.internal[data-footnote-ref] {
+article sup > a.internal[data-footnote-ref],
+.footnotes a.internal[data-footnote-backref] {
   display: inline-block;
   min-width: 1.45em;
   margin-left: 0.15em;
@@ -1608,21 +1579,17 @@ article sup > a.internal[data-footnote-ref] {
 
   & > ol {
     margin: 0;
-    padding-left: 1.8em;
+    padding: 0;
+    list-style: none;
   }
 
   & li {
-    padding: 0.35rem 0.5rem;
-    margin-left: -0.5rem;
+    position: relative;
+    margin: 0 0 0 -0.5rem;
+    padding: 0.35rem 0.5rem 0.35rem 2.6rem;
+    line-height: 1.6;
     border-radius: 4px;
     scroll-margin-top: calc(var(--header-h) + 1.5rem);
-
-    &::marker {
-      font-family: var(--font-mono);
-      font-variant-numeric: tabular-nums;
-      font-size: 0.8em;
-      color: var(--slate);
-    }
 
     &:target {
       background: var(--inset);
@@ -1633,23 +1600,16 @@ article sup > a.internal[data-footnote-ref] {
     }
   }
 
+  /* Номер-ссылка встаёт слева на первую строку сноски; повторные ссылки на ту же
+     сноску (если метка в тексте не одна) прячутся за первой */
   & a.internal[data-footnote-backref] {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    width: 1.35rem;
-    height: 1.35rem;
-    margin-left: 0.4rem;
-    padding: 0;
-    vertical-align: -0.3em;
-    color: var(--slate);
-    text-decoration: none;
-    border: 1px solid var(--hairline);
-    border-radius: 2px;
+    position: absolute;
+    left: 0.5rem;
+    top: calc(0.578rem - 1px);
+    margin: 0;
 
-    & > svg {
-      width: 0.75rem;
-      height: 0.75rem;
+    & ~ a[data-footnote-backref] {
+      display: none;
     }
   }
 }

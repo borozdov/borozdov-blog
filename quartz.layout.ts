@@ -3,11 +3,14 @@ import * as Component from "./quartz/components"
 
 const isIndex = (slug: string | undefined) => slug === "index"
 
-// Шапка сайта: вордмарк, поиск, лик, режим чтения. Одна на все страницы.
+// Шапка сайта: вордмарк, поиск, граф связей, лик, режим чтения. Одна на все страницы.
 const siteHeader = [
   Component.PageTitle(),
   Component.Spacer(),
   Component.Search(),
+  Component.Graph({
+    globalGraph: { scale: 0.8, linkDistance: 40, fontSize: 0.55 },
+  }),
   Component.Darkmode(),
   Component.DesktopOnly(Component.ReaderMode()),
 ]
@@ -66,14 +69,7 @@ export const defaultContentPageLayout: PageLayout = {
     Component.TagList(),
   ],
   left: [explorer],
-  right: [
-    Component.DesktopOnly(Component.TableOfContents()),
-    Component.Graph({
-      localGraph: { depth: 2, scale: 1, linkDistance: 40, fontSize: 0.55 },
-      globalGraph: { scale: 0.8, linkDistance: 40, fontSize: 0.55 },
-    }),
-    Component.Backlinks(),
-  ],
+  right: [Component.DesktopOnly(Component.TableOfContents()), Component.Backlinks()],
 }
 
 // components for pages that display lists of pages  (e.g. tags or folders)
