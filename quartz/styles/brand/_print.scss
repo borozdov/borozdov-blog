@@ -1,0 +1,41 @@
+@use "../variables.scss" as *;
+
+/* ---------- Печать (canon §41) ----------------------------------------------
+   Токены печати — третий набор в _tokens.scss; здесь только раскладка листа.
+   -------------------------------------------------------------------------- */
+
+@media print {
+  @page {
+    margin: 14mm 12mm;
+  }
+
+  body {
+    font-size: 10pt;
+  }
+
+  * {
+    print-color-adjust: exact !important;
+  }
+
+  .site-header,
+  .site-footer,
+  .sidebar,
+  .page-footer,
+  .clipboard-button,
+  .expand-button,
+  .popover,
+  .skip-link,
+  .navigation-progress {
+    display: none !important;
+  }
+
+  .site-body {
+    display: block;
+  }
+
+  article a.external::after {
+    content: " (" attr(href) ")";
+    color: var(--slate);
+    font-size: 0.85em;
+  }
+}

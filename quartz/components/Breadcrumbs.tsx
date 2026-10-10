@@ -97,7 +97,12 @@ export default ((opts?: Partial<BreadcrumbOptions>) => {
         )}
         {crumbs.map((crumb, index) => (
           <div class="breadcrumb-element">
-            <a href={crumb.path}>{crumb.displayName}</a>
+            <a
+              href={crumb.path}
+              aria-current={index === crumbs.length - 1 && !crumb.path ? "page" : undefined}
+            >
+              {crumb.displayName}
+            </a>
             {index !== crumbs.length - 1 && <p aria-hidden="true">{options.spacerSymbol}</p>}
           </div>
         ))}

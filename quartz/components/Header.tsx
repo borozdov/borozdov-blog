@@ -1,7 +1,7 @@
 import { QuartzComponent, QuartzComponentConstructor, QuartzComponentProps } from "./types"
 
 // Шапка сайта: липкая полоса с вордмарком, поиском и переключателями.
-// Вид — в styles/custom.scss (раздел «Шапка»).
+// Вид — в styles/brand/_shell.scss (раздел «Шапка»).
 const Header: QuartzComponent = ({ children }: QuartzComponentProps) => {
   return children.length > 0 ? (
     <header class="site-header">

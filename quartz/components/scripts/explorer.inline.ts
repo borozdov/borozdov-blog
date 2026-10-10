@@ -154,6 +154,23 @@ function createFolderNode(
   return li
 }
 
+// Активная заметка должна быть видна в колонке проводника. scrollIntoView двигал бы
+// заодно и окно: страница при каждом открытии съезжала вниз. Поэтому прокручивается
+// только ближайший прокручиваемый предок — колонка или мобильная панель.
+function revealInScrollBox(el: HTMLElement) {
+  for (let box = el.parentElement; box && box !== document.body; box = box.parentElement) {
+    const { overflowY } = getComputedStyle(box)
+    if (overflowY !== "auto" && overflowY !== "scroll") continue
+    if (box.scrollHeight <= box.clientHeight) continue
+    const elRect = el.getBoundingClientRect()
+    const boxRect = box.getBoundingClientRect()
+    if (elRect.top < boxRect.top || elRect.bottom > boxRect.bottom) {
+      box.scrollTop += elRect.top - boxRect.top - boxRect.height / 3
+    }
+    return
+  }
+}
+
 async function setupExplorer(currentSlug: FullSlug) {
   const allExplorers = document.querySelectorAll("div.explorer") as NodeListOf<HTMLElement>
 
@@ -226,9 +243,9 @@ async function setupExplorer(currentSlug: FullSlug) {
       explorerUl.scrollTop = parseInt(scrollTop)
     } else {
       // try to scroll to the active element if it exists
-      const activeElement = explorerUl.querySelector(".active")
+      const activeElement = explorerUl.querySelector(".active") as HTMLElement | null
       if (activeElement) {
-        activeElement.scrollIntoView({ behavior: "smooth" })
+        revealInScrollBox(activeElement)
       }
     }
 

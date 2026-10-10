@@ -1,0 +1,417 @@
+@use "../variables.scss" as *;
+
+/* ============================================================
+   Оболочка сайта: шапка → три колонки → футер
+   ============================================================ */
+
+.site-header-inner,
+.site-body,
+.site-footer-inner {
+  box-sizing: border-box;
+}
+
+/* ---------- Шапка ---------------------------------------------------------- */
+
+.site-header {
+  position: sticky;
+  top: 0;
+  z-index: 50;
+  background: var(--canvas);
+  border-bottom: 1px solid var(--hairline);
+}
+
+.site-header-inner {
+  max-width: var(--shell-max);
+  height: var(--header-h);
+  margin: 0 auto;
+  padding: 0 var(--shell-pad);
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.site-header .spacer {
+  flex: 1 1 auto;
+}
+
+.page-title {
+  margin: 0;
+  font-size: 1.15rem;
+  text-transform: uppercase;
+  letter-spacing: -0.02em;
+  font-weight: 700;
+  line-height: 1;
+
+  a {
+    display: inline-flex;
+    align-items: center;
+    min-height: 36px;
+    color: var(--ink);
+    text-decoration: none;
+  }
+}
+
+/* Кнопки шапки — один примитив: квадрат 36px, рамка strong, ховер — инверсия.
+   Включённое состояние (режим чтения) — та же инверсия. */
+.site-header :is(.darkmode, .readermode, .graph-button) {
+  position: relative;
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  margin: 0;
+  padding: 0;
+  background: transparent;
+  border: 1px solid var(--strong);
+  border-radius: 4px;
+  color: var(--ink);
+  line-height: 1;
+  cursor: pointer;
+  transition:
+    background-color 0.15s ease,
+    color 0.15s ease,
+    border-color 0.15s ease;
+
+  & svg {
+    width: 18px;
+    height: 18px;
+  }
+
+  /* Тач-зона больше видимой рамки */
+  &::after {
+    content: "";
+    position: absolute;
+    inset: -4px;
+  }
+}
+
+.site-header .graph-button {
+  display: inline-flex;
+}
+
+:root[reader-mode="on"] .site-header .readermode {
+  background: var(--ink);
+  border-color: var(--ink);
+  color: var(--canvas);
+}
+
+@media (hover: hover) {
+  .site-header :is(.darkmode, .readermode, .graph-button):hover {
+    background: var(--ink);
+    border-color: var(--ink);
+    color: var(--canvas);
+  }
+}
+
+@media (hover: none) {
+  .site-header :is(.darkmode, .readermode, .graph-button):active {
+    background: var(--hover);
+  }
+}
+
+/* Поиск в шапке: поле с подсказкой клавиш */
+.site-header .search {
+  /* Ширина — по кнопке: иначе Quartz растягивает блок и справа появляется дыра */
+  flex: 0 0 auto;
+  max-width: none;
+  min-width: 0;
+  margin-right: 0.25rem;
+
+  & > .search-button {
+    display: flex;
+    align-items: center;
+    width: 15rem;
+    height: 36px;
+    padding: 0 0.4rem 0 0.75rem;
+    gap: 0.5rem;
+    background: var(--inset);
+    border: 1px solid var(--hairline);
+    border-radius: 4px;
+    color: var(--slate);
+    cursor: pointer;
+    transition:
+      border-color 0.15s ease,
+      color 0.15s ease;
+
+    & > svg {
+      width: 16px;
+      min-width: 16px;
+      height: 16px;
+      margin: 0;
+    }
+
+    & > p {
+      flex: 1;
+      margin: 0;
+      color: inherit;
+      text-transform: uppercase;
+      font-size: 0.68rem;
+      letter-spacing: 0.1em;
+      font-weight: 500;
+      line-height: 1;
+      text-align: left;
+    }
+
+    & > .search-kbd {
+      font-family: var(--font-mono);
+      font-size: 0.65rem;
+      color: var(--slate);
+      border: 1px solid var(--hairline);
+      border-radius: 2px;
+      padding: 0.2rem 0.35rem;
+      line-height: 1;
+    }
+  }
+}
+
+@media (hover: hover) {
+  .site-header .search > .search-button:hover {
+    border-color: var(--strong);
+    color: var(--ink);
+  }
+}
+
+@media all and ($mobile) {
+  .site-header .search {
+    margin-right: 0;
+  }
+
+  .site-header .search > .search-button {
+    position: relative;
+    width: 36px;
+    padding: 0;
+    justify-content: center;
+    background: transparent;
+    border-color: var(--strong);
+    color: var(--ink);
+
+    & > svg {
+      width: 18px;
+      min-width: 18px;
+      height: 18px;
+    }
+
+    & > p,
+    & > .search-kbd {
+      display: none;
+    }
+
+    &::after {
+      content: "";
+      position: absolute;
+      inset: -4px;
+    }
+  }
+
+  .site-header .search > .search-button:active {
+    background: var(--hover);
+    color: var(--ink);
+  }
+}
+
+/* ---------- Тело: три колонки ---------------------------------------------- */
+
+.site-body {
+  flex: 1 0 auto;
+  width: 100%;
+  max-width: var(--shell-max);
+  margin: 0 auto;
+  padding: 0 var(--shell-pad);
+  display: grid;
+  grid-template-columns: var(--rail-left) minmax(0, 1fr) var(--rail-right);
+  column-gap: var(--rail-gap);
+  align-items: start;
+}
+
+.sidebar {
+  position: sticky;
+  top: var(--header-h);
+  box-sizing: border-box;
+  max-height: calc(100dvh - var(--header-h));
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  display: flex;
+  flex-direction: column;
+  gap: 2.25rem;
+  margin: 0;
+  padding: 2.5rem 0 2rem;
+  min-width: 0;
+  background: none;
+}
+
+.center {
+  min-width: 0;
+  padding: 2.5rem 0 5rem;
+  outline: none;
+}
+
+.page-header {
+  margin-bottom: 1.75rem;
+}
+
+.page-footer {
+  display: flex;
+  flex-direction: column;
+  gap: 3rem;
+  margin-top: 4rem;
+
+  &:empty {
+    display: none;
+  }
+}
+
+/* Заголовки виджетов — лейблы */
+.sidebar h2,
+.sidebar h3,
+.explorer .title-button h2,
+.toc > .toc-header h3,
+.backlinks > h3,
+.recent-notes > h3,
+.telegram-comments__title {
+  margin: 0;
+  color: var(--slate);
+  font-family: var(--font-sans);
+  text-transform: uppercase;
+  font-size: 0.66rem;
+  font-weight: 500;
+  letter-spacing: 0.14em;
+  line-height: 1;
+}
+
+/* Планшет: правая колонка уходит под статью */
+@media all and ($tablet) {
+  .site-body {
+    grid-template-columns: 220px minmax(0, 1fr);
+    column-gap: 2.5rem;
+  }
+
+  .sidebar.right {
+    grid-column: 2;
+    position: static;
+    max-height: none;
+    overflow: visible;
+    padding-top: 0;
+    flex-direction: row;
+    flex-wrap: wrap;
+    gap: 2rem;
+
+    & > * {
+      flex: 1 1 18rem;
+    }
+
+    & > .toc {
+      display: none;
+    }
+  }
+}
+
+/* Телефон: одна колонка, проводник — панель по кнопке в полосе под шапкой */
+@media all and ($mobile) {
+  .site-body {
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .sidebar {
+    position: static;
+    max-height: none;
+    overflow: visible;
+    padding: 0;
+  }
+
+  .sidebar.left {
+    order: -1;
+    position: sticky;
+    top: var(--header-h);
+    z-index: 40;
+    flex-direction: row;
+    align-items: center;
+    height: 45px;
+    margin: 0 calc(-1 * var(--shell-pad));
+    padding: 0 var(--shell-pad);
+    background: var(--canvas);
+    border-bottom: 1px solid var(--hairline);
+  }
+
+  .center {
+    padding: 1.5rem 0 3rem;
+  }
+
+  .page-footer {
+    margin-top: 3rem;
+  }
+
+  .sidebar.right {
+    padding: 0 0 2.5rem;
+    gap: 2rem;
+
+    & > .toc {
+      display: none;
+    }
+  }
+}
+
+/* ---------- Футер ---------------------------------------------------------- */
+
+.site-footer {
+  margin-top: auto;
+  border-top: 1px solid var(--hairline);
+  background: var(--canvas);
+}
+
+.site-footer-inner {
+  max-width: var(--shell-max);
+  margin: 0 auto;
+  padding: 1.5rem var(--shell-pad);
+  display: flex;
+  align-items: center;
+  gap: 1rem 2.5rem;
+  flex-wrap: wrap;
+}
+
+.site-footer-mark {
+  margin: 0;
+  color: var(--ink);
+  font-size: 0.85rem;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  text-transform: uppercase;
+}
+
+.site-footer-links {
+  flex: 1 1 auto;
+
+  li a {
+    display: inline-flex;
+    align-items: center;
+    min-height: 32px;
+    color: var(--slate);
+    text-transform: uppercase;
+    font-size: 0.66rem;
+    letter-spacing: 0.12em;
+    font-weight: 500;
+    text-decoration: underline;
+    text-decoration-thickness: 1px;
+    text-underline-offset: 4px;
+    text-decoration-color: transparent;
+  }
+}
+
+.site-footer-copy {
+  margin: 0;
+  color: var(--slate);
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+  font-size: 0.66rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+@media (hover: hover) {
+  .site-footer-links li a:hover {
+    color: var(--ink);
+    text-decoration-color: var(--ink);
+  }
+}

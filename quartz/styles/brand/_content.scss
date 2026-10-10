@@ -1,0 +1,504 @@
+@use "../variables.scss" as *;
+
+/* ============================================================
+   Содержимое заметки. Правила не привязаны к .page: та же заметка
+   рендерится в попапе и в превью поиска и выглядит там так же.
+   ============================================================ */
+
+/* ---------- Теги: контурные бейджи, ховер — инверсия ----------------------- */
+
+ul.tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+  margin: 0.9rem 0 0;
+  padding: 0;
+  list-style: none;
+
+  & > li {
+    margin: 0;
+  }
+}
+
+a.internal.tag-link {
+  display: inline-block;
+  background: transparent;
+  border: 1px solid var(--strong);
+  border-radius: 2px;
+  color: var(--soft);
+  text-transform: uppercase;
+  font-size: 0.62rem;
+  font-weight: 500;
+  letter-spacing: 0.08em;
+  line-height: 1.4;
+  padding: 0.2rem 0.5rem;
+  margin: 0;
+  text-decoration: none;
+  white-space: nowrap;
+
+  &::before {
+    content: none;
+  }
+}
+
+@media (hover: hover) {
+  a.internal.tag-link:hover {
+    background: var(--ink);
+    border-color: var(--ink);
+    color: var(--canvas);
+  }
+}
+
+/* ---------- Списки --------------------------------------------------------- */
+
+article :is(ul, ol) {
+  padding-left: 1.4em;
+
+  & > li {
+    margin: 0.3em 0;
+  }
+
+  & > li::marker {
+    color: var(--slate);
+  }
+}
+
+article ol > li::marker {
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+  font-size: 0.85em;
+}
+
+/* ---------- Задачи ---------------------------------------------------------
+   Квадрат 16px в рамке strong, выполненная — инверсия с штриховой галочкой.
+   Маркер списка у задач убран везде, а не только на странице: раньше в попапе
+   и превью поиска он просвечивал точкой в углу квадрата. Квадрат стоит в поле
+   слева и выровнен по первой строке пункта.
+   -------------------------------------------------------------------------- */
+
+ul.contains-task-list {
+  padding-left: 0;
+  list-style: none;
+}
+
+li.task-list-item {
+  position: relative;
+  list-style: none;
+  padding-left: 1.75em;
+
+  &::marker {
+    content: none;
+  }
+
+  & > input[type="checkbox"] {
+    position: absolute;
+    left: 0;
+    top: calc(var(--text-lh) * 0.5em - 8px);
+    margin: 0;
+  }
+}
+
+input[type="checkbox"] {
+  appearance: none;
+  -webkit-appearance: none;
+  position: relative;
+  box-sizing: border-box;
+  width: 16px;
+  height: 16px;
+  margin: 0;
+  padding: 0;
+  font-size: inherit;
+  vertical-align: middle;
+  background: transparent;
+  border: 1px solid var(--strong);
+  border-radius: 4px;
+  transform: none;
+  cursor: pointer;
+  transition:
+    background-color 0.15s ease,
+    border-color 0.15s ease;
+
+  &:disabled {
+    cursor: default;
+  }
+
+  &::after {
+    content: none;
+  }
+
+  &:checked {
+    background: var(--ink);
+    border-color: var(--ink);
+
+    &::after {
+      content: "";
+      position: absolute;
+      inset: 0;
+      display: block;
+      width: auto;
+      height: auto;
+      border: none;
+      transform: none;
+      background: var(--canvas);
+      -webkit-mask: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="square"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>')
+        center / 12px 12px no-repeat;
+      mask: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="square"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>')
+        center / 12px 12px no-repeat;
+    }
+  }
+}
+
+@media (hover: hover) {
+  input[type="checkbox"]:not(:disabled, :checked):hover {
+    border-color: var(--ink);
+  }
+}
+
+li.task-list-item:has(> input[type="checkbox"]:checked) {
+  color: var(--slate);
+  text-decoration: line-through;
+  text-decoration-color: var(--strong);
+}
+
+/* ---------- Цитаты: линия 2px ink, без курсива ----------------------------- */
+
+blockquote {
+  margin: 1.5rem 0;
+  border-left: 2px solid var(--ink);
+  background: transparent;
+  color: var(--soft);
+  font-style: normal;
+  padding-left: 1.1rem;
+}
+
+/* ---------- Код ------------------------------------------------------------ */
+
+pre,
+code {
+  font-family: var(--font-mono);
+  /* Лигатуры JetBrains Mono превращают !== в ≢ — в коде символы должны быть как набраны */
+  font-variant-ligatures: none;
+}
+
+pre {
+  position: relative;
+  border: 1px solid var(--hairline);
+  border-radius: 8px;
+  background: var(--inset);
+
+  & > code > [data-line]::before {
+    color: var(--tertiary);
+  }
+
+  & > code > [data-line][data-highlighted-line] {
+    background: var(--hover);
+    border-left-color: var(--ink);
+  }
+
+  & > code [data-highlighted-chars] {
+    background: var(--hover);
+  }
+}
+
+figure[data-rehype-pretty-code-figure] {
+  margin: 1.25rem 0;
+
+  & > [data-rehype-pretty-code-title] {
+    width: auto;
+    margin: 0;
+    font-family: var(--font-mono);
+    font-size: 0.72rem;
+    color: var(--slate);
+    background: var(--surface);
+    border: 1px solid var(--hairline);
+    border-bottom: none;
+    border-radius: 8px 8px 0 0;
+    padding: 0.5rem 0.9rem;
+  }
+
+  & > [data-rehype-pretty-code-title] + pre {
+    border-top-left-radius: 0;
+    border-top-right-radius: 0;
+    margin-top: 0;
+  }
+}
+
+:not(pre) > code {
+  background: var(--inset);
+  border: 1px solid var(--hairline);
+  border-radius: 4px;
+  color: var(--ink);
+  font-size: 0.85em;
+  padding: 0.1em 0.35em;
+}
+
+/* Кнопки на блоке кода (копировать, развернуть mermaid): квадрат в правом верхнем углу */
+.clipboard-button,
+.expand-button {
+  position: absolute;
+  top: 0.5rem;
+  right: 0.5rem;
+  display: flex;
+  width: 30px;
+  height: 30px;
+  margin: 0;
+  padding: 0;
+  float: none;
+  align-items: center;
+  justify-content: center;
+  color: var(--slate);
+  background: var(--surface);
+  border: 1px solid var(--hairline);
+  border-radius: 4px;
+  opacity: 1;
+  cursor: pointer;
+  transition:
+    background-color 0.15s ease,
+    color 0.15s ease,
+    border-color 0.15s ease;
+
+  & > svg {
+    width: 15px;
+    height: 15px;
+    fill: none;
+    filter: none;
+  }
+
+  &.copied {
+    background: var(--ink);
+    border-color: var(--ink);
+    color: var(--canvas);
+  }
+}
+
+@media (hover: hover) {
+  .clipboard-button:not(.copied):hover,
+  .expand-button:hover {
+    border-color: var(--strong);
+    color: var(--ink);
+  }
+}
+
+/* ---------- Таблицы: радиус 8, зебра --------------------------------------- */
+
+.table-container {
+  margin: 1.25rem 0;
+  overflow-x: auto;
+}
+
+.table-container > table,
+article table {
+  border: 1px solid var(--hairline);
+  border-radius: 8px;
+  border-collapse: separate;
+  border-spacing: 0;
+  overflow: hidden;
+  font-variant-numeric: tabular-nums;
+  margin: 0;
+  padding: 0;
+
+  & > * {
+    line-height: 1.5;
+  }
+
+  th {
+    background: var(--inset);
+    color: var(--slate);
+    text-transform: uppercase;
+    font-size: 0.66rem;
+    letter-spacing: 0.12em;
+    font-weight: 500;
+    border-bottom: 1px solid var(--hairline);
+    padding: 0.6rem 1rem;
+  }
+
+  td {
+    border-bottom: 1px solid var(--hairline);
+    padding: 0.6rem 1rem;
+    color: var(--soft);
+  }
+
+  tr {
+    border-bottom: none;
+  }
+
+  tbody tr:nth-child(even) {
+    background: var(--zebra);
+  }
+
+  tr:last-child td {
+    border-bottom: none;
+  }
+}
+
+@media (hover: hover) {
+  article table tbody tr:hover {
+    background: var(--hover);
+  }
+}
+
+/* ---------- Выноски: один вид на все типы (callouts.scss) ------------------ */
+
+.callout {
+  margin: 1.25rem 0;
+  padding: 0 1.1rem;
+
+  /* Иконка и заголовок на одной оси: коробка иконки высотой ровно в строку заголовка,
+     сама иконка по центру коробки. У Inter прописные стоят по центру строки. */
+  & > .callout-title {
+    --icon-size: 16px;
+    gap: 0.55rem;
+    color: var(--ink);
+
+    .callout-icon,
+    .fold-callout-icon {
+      height: 20px;
+      padding: 0;
+    }
+
+    .callout-title-inner > p {
+      line-height: 20px;
+      color: var(--ink);
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      font-size: 0.78rem;
+      font-weight: 600;
+    }
+  }
+
+  &.is-collapsible > .callout-title {
+    cursor: pointer;
+  }
+
+  & > .callout-content {
+    color: var(--soft);
+
+    & > :last-child {
+      margin-bottom: 1rem;
+    }
+  }
+}
+
+/* ---------- Сноски --------------------------------------------------------
+   Метка в тексте и номер внизу — одна и та же моно-цифра в hairline-рамке,
+   ховер — инверсия. Номер внизу и есть ссылка обратно к тексту: стрелок нет.
+   -------------------------------------------------------------------------- */
+
+article sup:has(> a[data-footnote-ref]) {
+  line-height: 0;
+}
+
+article sup > a.internal[data-footnote-ref],
+.footnotes a.internal[data-footnote-backref] {
+  display: inline-block;
+  min-width: 1.45em;
+  margin-left: 0.15em;
+  padding: 0.2em 0.3em;
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+  font-size: 0.68rem;
+  font-weight: 600;
+  line-height: 1;
+  text-align: center;
+  text-decoration: none;
+  color: var(--slate);
+  background: transparent;
+  border: 1px solid var(--hairline);
+  border-radius: 2px;
+}
+
+.footnotes {
+  margin-top: 3rem;
+  padding-top: 1.5rem;
+  border-top: 1px solid var(--hairline);
+  color: var(--soft);
+  font-size: 0.88rem;
+
+  & > .footnotes-label {
+    margin: 0 0 1rem;
+    color: var(--slate);
+    text-transform: uppercase;
+    font-size: 0.66rem;
+    font-weight: 500;
+    letter-spacing: 0.14em;
+    line-height: 1;
+
+    & > a[role="anchor"] {
+      display: none;
+    }
+  }
+
+  & > ol {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  & li {
+    position: relative;
+    margin: 0 0 0 -0.5rem;
+    padding: 0.35rem 0.5rem 0.35rem 2.6rem;
+    line-height: 1.6;
+    border-radius: 4px;
+
+    &::marker {
+      content: none;
+    }
+
+    &:target {
+      background: var(--inset);
+    }
+
+    & > p {
+      margin: 0;
+    }
+  }
+
+  /* Номер-ссылка встаёт слева на первую строку сноски; повторные ссылки на ту же
+     сноску (если метка в тексте не одна) прячутся за первой */
+  & a.internal[data-footnote-backref] {
+    position: absolute;
+    left: 0.5rem;
+    top: calc(0.578rem - 1px);
+    margin: 0;
+
+    & ~ a[data-footnote-backref] {
+      display: none;
+    }
+  }
+}
+
+@media (hover: hover) {
+  article sup > a.internal[data-footnote-ref]:hover,
+  .footnotes a.internal[data-footnote-backref]:hover {
+    background: var(--ink);
+    border-color: var(--ink);
+    color: var(--canvas);
+  }
+}
+
+/* ---------- Изображения, видео, формулы ------------------------------------ */
+
+article img {
+  border: 1px solid var(--hairline);
+  border-radius: 8px;
+}
+
+article :is(video, iframe.pdf, .external-embed) {
+  border-radius: 8px;
+}
+
+.katex {
+  color: var(--ink);
+}
+
+/* ---------- Встраивание заметки ![[…]] ------------------------------------- */
+
+blockquote.transclude {
+  border-left: 1px solid var(--hairline);
+  padding: 0.25rem 0 0.25rem 1.1rem;
+
+  & > .transclude-inner {
+    color: var(--slate);
+  }
+}

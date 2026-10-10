@@ -43,7 +43,7 @@ export function createHtmlProcessor(ctx: BuildCtx): QuartzHtmlProcessor {
         footnoteLabel: "Сноски",
         footnoteLabelProperties: { className: ["footnotes-label"] },
         footnoteBackLabel: "Вернуться к тексту",
-        // Без символа ↩: возврат к тексту — сам номер сноски слева (стили в custom.scss)
+        // Без символа ↩: возврат к тексту — сам номер сноски слева (стили в styles/brand/_content.scss)
         footnoteBackContent: (referenceIndex) => ({
           type: "text",
           value: String(referenceIndex + 1),
