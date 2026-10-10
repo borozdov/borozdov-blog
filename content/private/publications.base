@@ -48,7 +48,7 @@ views:
       and:
         - draft != true
         - comments != false
-        - '!telegram_discussion'
+        - "!telegram_discussion"
         - file.name != "index"
     order:
       - file.name
