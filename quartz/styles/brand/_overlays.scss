@@ -182,11 +182,6 @@
     overscroll-behavior: none;
   }
 
-  /* Подглядывание из строки списка: карточка не перехватывает мышь */
-  &.popover--peek {
-    pointer-events: none;
-  }
-
   /* Картинка и PDF — без полей, во всю карточку */
   & > .popover-inner[data-content-type*="image"],
   & > .popover-inner[data-content-type*="pdf"] {

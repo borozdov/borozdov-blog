@@ -26,9 +26,6 @@ async function mouseEnterHandler(
 
   function showPopover(popoverElement: HTMLElement) {
     clearActivePopover()
-    // Из строки списка заметок попап — подглядывание: он не ловит мышь, и курсор
-    // свободно идёт по строкам ниже, вместо того чтобы застрять на карточке
-    popoverElement.classList.toggle("popover--peek", link.closest(".section") !== null)
     popoverElement.classList.add("active-popover")
     setPosition(popoverElement as HTMLElement)
 
