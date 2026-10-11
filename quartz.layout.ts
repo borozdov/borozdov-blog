@@ -1,7 +1,12 @@
 import { PageLayout, SharedLayout } from "./quartz/cfg"
 import * as Component from "./quartz/components"
+import { QuartzPluginData } from "./quartz/plugins/vfile"
 
 const isIndex = (slug: string | undefined) => slug === "index"
+
+// Заметка ленты: не главная, не служебная страница и не index.md папки
+const isNote = (f: QuartzPluginData) =>
+  f.slug !== "index" && !f.slug!.endsWith("/index") && f.frontmatter?.noindex !== true
 
 // Шапка сайта: вордмарк, поиск, граф связей, лик, режим чтения. Одна на все страницы.
 const siteHeader = [
@@ -32,12 +37,12 @@ export const sharedPageComponents: SharedLayout = {
         title: "Последние заметки",
         limit: 10,
         showTags: true,
-        // Только заметки: без главной, служебных страниц и index.md папок
-        filter: (f) =>
-          f.slug !== "index" && !f.slug!.endsWith("/index") && f.frontmatter?.noindex !== true,
+        filter: isNote,
       }),
       condition: (page) => isIndex(page.fileData.slug),
     }),
+    // Под заметкой — соседние заметки по дате: «Раньше» и «Позже»
+    Component.NoteNav({ filter: isNote }),
     // Комментарии — обсуждение поста в @BorozdovBlog. Ссылка на пост лежит в заметке:
     // telegram_discussion: https://t.me/BorozdovBlog/123 (или просто 123)
     Component.Comments({

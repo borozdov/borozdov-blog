@@ -32,7 +32,7 @@ const config: QuartzConfig = {
         code: "JetBrains Mono",
       },
       // BOROZDOV: переменные самого Quartz, выраженные через роли бренда (canon §2).
-      // Источник истины — токены в quartz/styles/custom.scss; значения здесь им равны.
+      // Источник истины — токены в quartz/styles/brand/_tokens.scss; значения здесь им равны.
       colors: {
         lightMode: {
           light: "#fafafa", // canvas

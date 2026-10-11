@@ -1,45 +1,6 @@
-// Переключатель лика: квадратная кнопка с hairline, ховер — инверсия (canon §9, закон 2)
+// Переключатель лика. Вид кнопки — общий примитив шапки в styles/brand/_shell.scss.
 .darkmode {
-  cursor: pointer;
-  position: relative;
-  flex-shrink: 0;
   display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: 36px;
-  height: 36px;
-  margin: 0;
-  padding: 0;
-  background: transparent;
-  border: 1px solid var(--strong);
-  border-radius: 4px;
-  color: var(--ink);
-  line-height: 1;
-  transition:
-    background 0.15s ease,
-    color 0.15s ease,
-    border-color 0.15s ease;
-
-  & svg {
-    width: 18px;
-    height: 18px;
-  }
-
-  @media (hover: hover) {
-    &:hover {
-      background: var(--ink);
-      border-color: var(--ink);
-      color: var(--canvas);
-    }
-  }
-}
-
-:root[saved-theme="dark"] {
-  color-scheme: dark;
-}
-
-:root[saved-theme="light"] {
-  color-scheme: light;
 }
 
 // ОБСИДИАН показывает солнце (переключит на ТИТАН), ТИТАН — луну

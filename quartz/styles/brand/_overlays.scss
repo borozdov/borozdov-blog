@@ -1,0 +1,378 @@
+@use "../variables.scss" as *;
+
+/* ============================================================
+   Всплывающие слои: поиск, попап-предпросмотр, граф, mermaid.
+   Окно — поверхность в hairline-рамке, радиус 8, за ним дымка
+   с размытием (единственная разрешённая «тень», закон 4).
+   ============================================================ */
+
+/* ---------- Поиск: модальное окно ------------------------------------------ */
+
+.search > .search-container {
+  background: var(--scrim);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+
+  & > .search-space {
+    width: min(760px, 92vw);
+    margin-top: 8vh;
+
+    & > * {
+      background: var(--surface);
+      border: 1px solid var(--hairline);
+      border-radius: 8px;
+      margin-bottom: 0.75rem;
+    }
+
+    & > .search-bar {
+      height: 56px;
+      padding: 0 1.25rem;
+      font-family: var(--font-sans);
+      font-size: 1.05rem;
+      color: var(--ink);
+      border-color: var(--strong);
+
+      &::placeholder {
+        color: var(--tertiary);
+      }
+
+      &:focus,
+      &:focus-visible {
+        outline: none;
+        border-color: var(--ink);
+        box-shadow: inset 0 0 0 1px var(--ink);
+      }
+    }
+
+    & > .search-layout {
+      max-height: 70vh;
+      overflow: hidden;
+
+      & > div {
+        height: auto;
+        max-height: 70vh;
+        border-radius: 0;
+      }
+
+      & .highlight {
+        background: var(--ink);
+        color: var(--canvas);
+        border-radius: 2px;
+      }
+
+      & > .results-container {
+        background: var(--surface);
+      }
+
+      & > .results-container .result-card {
+        padding: 0.9rem 1.1rem;
+        border-bottom: 1px solid var(--hairline);
+        background: transparent;
+        color: var(--ink);
+        transition: background-color 0.15s ease;
+
+        &:hover,
+        &:focus,
+        &.focus {
+          background: var(--hover);
+        }
+
+        & > h3 {
+          font-size: 0.95rem;
+          line-height: 1.3;
+          text-transform: none;
+          letter-spacing: 0;
+          color: var(--ink);
+        }
+
+        & > p.card-description {
+          color: var(--slate);
+          font-size: 0.85rem;
+          margin: 0.3rem 0 0;
+        }
+
+        & > ul.tags {
+          margin-top: 0.5rem;
+          gap: 0.3rem;
+        }
+
+        & > ul > li > p {
+          margin: 0;
+          background: transparent;
+          border: 1px solid var(--strong);
+          border-radius: 2px;
+          color: var(--soft);
+          font-size: 0.6rem;
+          font-weight: 500;
+          text-transform: uppercase;
+          letter-spacing: 0.08em;
+          line-height: 1.4;
+          padding: 0.15rem 0.45rem;
+
+          &.match-tag {
+            background: var(--ink);
+            border-color: var(--ink);
+            color: var(--canvas);
+          }
+        }
+      }
+
+      /* Превью — та же заметка, что на странице, в чуть меньшем кегле */
+      & > .preview-container {
+        --text-lh: 1.6;
+        border-left: 1px solid var(--hairline);
+        background: var(--surface);
+        color: var(--soft);
+        padding: 1.25rem 1.75rem 2rem;
+        font-size: 0.92rem;
+
+        & .breadcrumb-container {
+          margin-bottom: 0.75rem;
+        }
+
+        & .article-title {
+          font-size: 1.6rem;
+          margin: 0 0 0.6rem;
+        }
+
+        & .page-header {
+          margin-bottom: 1.25rem;
+        }
+      }
+    }
+  }
+}
+
+/* ---------- Попап «быстрое прочтение» --------------------------------------
+   Карточка предпросмотра при наведении на ссылку: заголовок, дата, теги и
+   начало текста в уменьшенном кегле. Крошки и якоря заголовков скрыты.
+   Правила страниц (например, крупный заголовок главной) сюда не попадают:
+   они привязаны к .center, а попап живёт прямо в <body>.
+   -------------------------------------------------------------------------- */
+
+.popover {
+  padding: 0.75rem;
+
+  /* Непрозрачная подложка под прокручиваемой карточкой: Chrome рисует фон
+     скроллера вместе с содержимым, и при отскоке скролла он уезжал, оставляя
+     рамку над просвечивающей страницей. Подложка это закрывает. */
+  &::before {
+    content: "";
+    position: absolute;
+    inset: 0.75rem;
+    background: var(--surface);
+    border-radius: 8px;
+  }
+
+  & > .popover-inner {
+    --text-lh: 1.55;
+    position: relative;
+    box-sizing: border-box;
+    width: min(26rem, calc(100vw - 2rem));
+    max-height: 22rem;
+    padding: 1.1rem 1.25rem 1.25rem;
+    background: var(--surface);
+    border: 1px solid var(--strong);
+    border-radius: 8px;
+    color: var(--soft);
+    font-size: 0.86rem;
+    line-height: var(--text-lh);
+    user-select: text;
+    /* Без отскока на краях: содержимое не тянется за границу карточки */
+    overscroll-behavior: none;
+  }
+
+  /* Подглядывание из строки списка: карточка не перехватывает мышь */
+  &.popover--peek {
+    pointer-events: none;
+  }
+
+  /* Картинка и PDF — без полей, во всю карточку */
+  & > .popover-inner[data-content-type*="image"],
+  & > .popover-inner[data-content-type*="pdf"] {
+    padding: 0;
+  }
+
+  .breadcrumb-container,
+  a[role="anchor"],
+  .clipboard-button,
+  .expand-button,
+  .footnotes,
+  .note-nav {
+    display: none !important;
+  }
+
+  .page-header {
+    margin: 0 0 0.85rem;
+    padding-bottom: 0.85rem;
+    border-bottom: 1px solid var(--hairline);
+  }
+
+  .article-title {
+    font-size: 1.05rem;
+    margin: 0 0 0.45rem;
+    line-height: 1.15;
+  }
+
+  .content-meta {
+    margin: 0;
+    font-size: 0.66rem;
+  }
+
+  ul.tags {
+    margin: 0.6rem 0 0;
+    gap: 0.3rem;
+  }
+
+  a.internal.tag-link {
+    font-size: 0.58rem;
+    padding: 0.15rem 0.4rem;
+  }
+
+  article {
+    & > :first-child {
+      margin-top: 0;
+    }
+
+    h1,
+    h2,
+    h3,
+    h4,
+    h5,
+    h6 {
+      font-size: 0.82rem;
+      margin: 1.25em 0 0.45em;
+      letter-spacing: 0.02em;
+    }
+
+    p {
+      margin: 0.55em 0;
+    }
+
+    li {
+      margin: 0.25em 0;
+    }
+
+    ul,
+    ol {
+      margin: 0.55em 0;
+    }
+
+    pre,
+    :not(pre) > code {
+      font-size: 0.78em;
+    }
+
+    figure[data-rehype-pretty-code-figure],
+    .table-container,
+    .callout,
+    blockquote {
+      margin: 0.75em 0;
+    }
+
+    table {
+      font-size: 0.8rem;
+    }
+
+    img {
+      max-width: 100%;
+      margin: 0.5em 0;
+    }
+
+    .b-hero-title {
+      font-size: 1.6rem;
+    }
+
+    .b-actions {
+      gap: 0.4rem;
+    }
+
+    a.b-btn {
+      min-height: 32px;
+      padding: 0 0.75rem;
+      font-size: 0.62rem;
+    }
+  }
+
+  /* Попап страницы папки или тега: список строк, без колонки тегов */
+  li.section-li > .section {
+    grid-template-columns: 6.5rem minmax(0, 1fr);
+    padding: 0.6rem 0.25rem;
+
+    & > .tags {
+      display: none;
+    }
+  }
+
+  ul.section-ul {
+    margin: 0;
+  }
+}
+
+/* ---------- Граф связей ----------------------------------------------------
+   Кнопка в шапке (общий примитив шапки); граф — во всплывающем окне.
+   -------------------------------------------------------------------------- */
+
+.site-header .graph {
+  display: flex;
+  flex-shrink: 0;
+
+  & > .global-graph-outer {
+    background: var(--scrim);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+
+    & > .global-graph-container {
+      width: min(1100px, 92vw);
+      height: 82vh;
+      background: var(--surface);
+      border: 1px solid var(--hairline);
+      border-radius: 8px;
+      overflow: hidden;
+    }
+  }
+}
+
+/* ---------- Mermaid: окно схемы -------------------------------------------- */
+
+#mermaid-container {
+  background: var(--scrim);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+
+  & > #mermaid-space {
+    background: var(--surface);
+    border: 1px solid var(--hairline);
+    border-radius: 8px;
+
+    & > .mermaid-controls {
+      background: var(--surface);
+      border: 1px solid var(--hairline);
+      border-radius: 6px;
+
+      .mermaid-control-button {
+        background: transparent;
+        border: 1px solid var(--strong);
+        border-radius: 4px;
+        color: var(--ink);
+        font-family: var(--font-mono);
+        transition:
+          background-color 0.15s ease,
+          color 0.15s ease,
+          border-color 0.15s ease;
+
+        &:active {
+          transform: none;
+        }
+      }
+    }
+  }
+}
+
+@media (hover: hover) {
+  #mermaid-container .mermaid-control-button:hover {
+    background: var(--ink);
+    border-color: var(--ink);
+    color: var(--canvas);
+  }
+}

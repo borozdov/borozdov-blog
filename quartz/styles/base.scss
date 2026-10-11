@@ -1,8 +1,9 @@
 @use "sass:map";
 
+// Дефолты Quartz. custom.scss кладёт этот файл в нижний каскадный слой `quartz`:
+// любое правило бренда сильнее него. Подсветка кода и выноски — бренд, они подключены
+// в custom.scss вне слоя.
 @use "./variables.scss" as *;
-@use "./syntax.scss";
-@use "./callouts.scss";
 
 html {
   scroll-behavior: smooth;
@@ -160,7 +161,7 @@ a {
 }
 
 // Раскладка BOROZDOV: шапка → три колонки → футер у нижнего края.
-// Сетка Quartz из variables.scss не используется; размеры — в custom.scss.
+// Сетка Quartz из variables.scss не используется; размеры — в styles/brand/_shell.scss.
 .page {
   min-height: 100dvh;
   display: flex;

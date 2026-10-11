@@ -1,0 +1,249 @@
+@use "../variables.scss" as *;
+
+/* ---------- Заголовки: прописные — голос бренда ---------------------------- */
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6,
+.article-title {
+  color: var(--ink);
+  font-family: var(--font-sans);
+  text-transform: uppercase;
+  letter-spacing: -0.02em;
+  font-weight: $semiBoldWeight;
+  line-height: 1.05;
+}
+
+article {
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
+    margin-top: 2.2em;
+    margin-bottom: 0.9rem;
+  }
+
+  h4,
+  h5,
+  h6 {
+    letter-spacing: 0.02em;
+  }
+
+  & > :first-child {
+    margin-top: 0;
+  }
+}
+
+.article-title {
+  font-size: clamp(1.9rem, 5vw, 2.6rem);
+  margin: 1.5rem 0 0.75rem;
+}
+
+h1 a,
+h2 a,
+h3 a,
+h4 a,
+h5 a,
+h6 a,
+.page-title a {
+  font-weight: inherit;
+}
+
+strong {
+  color: var(--ink);
+  font-weight: $semiBoldWeight;
+}
+
+article p,
+article li {
+  line-height: var(--text-lh);
+}
+
+hr {
+  height: 1px;
+  margin: 2.5rem 0;
+  border: none;
+  background: var(--hairline);
+}
+
+/* Лейбл: прописные, разрежённые, slate */
+.b-label {
+  color: var(--slate);
+  text-transform: uppercase;
+  font-size: 0.7rem;
+  font-weight: 500;
+  letter-spacing: 0.12em;
+}
+
+/* Даты и счётчики — моно с табличными цифрами (закон 7) */
+.content-meta,
+.meta,
+time,
+.date {
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+  font-size: 0.75rem;
+  color: var(--slate);
+  letter-spacing: 0;
+}
+
+.content-meta {
+  margin: 0;
+  text-transform: uppercase;
+}
+
+/* Дата и время чтения разделены косой чертой, как крошки */
+.content-meta[show-comma="false"] > *:not(:last-child)::after {
+  content: "/";
+  margin: 0 0.6em;
+  color: var(--tertiary);
+}
+
+table,
+.katex {
+  font-variant-numeric: tabular-nums;
+}
+
+/* ---------- Ссылки ----------------------------------------------------------
+   Тот же полюс, что текст; отличие — подчёркивание strong. Ховер в тексте —
+   инверсия плашкой (canon §10.6): фон и цвет меняются в одном правиле.
+   Служебные ссылки (якоря, теги, сноски, кнопки, строки списков) исключены
+   из правила целиком: у них свой вид, и ховер текста им не достаётся ни при
+   какой специфичности — поэтому текст не может слиться с подложкой.
+   -------------------------------------------------------------------------- */
+
+$not-prose: '[role="anchor"], .tag-link, [data-footnote-ref], [data-footnote-backref], .b-btn, .b-card-cta, .b-links a, .b-card-title a, .section a, .note-nav a';
+
+a {
+  font-weight: 500;
+  color: var(--ink);
+  text-decoration: none;
+  transition:
+    background-color 0.15s ease,
+    color 0.15s ease,
+    border-color 0.15s ease,
+    text-decoration-color 0.15s ease;
+}
+
+a.internal {
+  background: none;
+  padding: 0;
+  border-radius: 0;
+  line-height: inherit;
+}
+
+article a:is(.internal, .external):where(:not(#{$not-prose})),
+.page-footer a.external:where(:not(#{$not-prose})) {
+  padding: 0 0.1em;
+  margin: 0 -0.1em;
+  border-radius: 2px;
+  color: var(--ink);
+  text-decoration: underline;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 3px;
+  text-decoration-color: var(--strong);
+  -webkit-box-decoration-break: clone;
+  box-decoration-break: clone;
+}
+
+@media (hover: hover) {
+  article a:is(.internal, .external):where(:not(#{$not-prose}, .broken)):hover,
+  .page-footer a.external:where(:not(#{$not-prose})):hover {
+    background: var(--ink);
+    color: var(--canvas);
+    text-decoration-color: transparent;
+  }
+}
+
+/* Стрелка внешней ссылки: штрих, наследует цвет */
+.external-icon {
+  display: inline-block;
+  width: 0.7em;
+  height: 0.7em;
+  margin: 0 0 0 0.12em;
+  vertical-align: 0.05em;
+  stroke: currentColor;
+
+  & > path {
+    fill: none;
+  }
+}
+
+/* Несуществующая заметка: tertiary, пунктир, без реакции на ховер */
+article a.internal.broken {
+  color: var(--tertiary);
+  opacity: 1;
+  text-decoration-style: dashed;
+  text-decoration-color: var(--tertiary);
+  cursor: default;
+}
+
+article a.internal:has(> img) {
+  text-decoration: none;
+  padding: 0;
+  margin: 0;
+}
+
+/* Якорь заголовка: маленькая штриховая иконка слева от заголовка, видна при наведении */
+article :is(h1, h2, h3, h4, h5, h6) {
+  position: relative;
+
+  & > a[role="anchor"] {
+    position: absolute;
+    left: -1.75rem;
+    top: 50%;
+    width: 1.25rem;
+    height: 1.25rem;
+    margin: 0;
+    padding: 0;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    transform: translateY(-50%);
+    color: var(--slate);
+    background: none;
+    border-radius: 4px;
+    text-decoration: none;
+    opacity: 0;
+    transition:
+      opacity 0.15s ease,
+      color 0.15s ease;
+
+    & > svg {
+      width: 16px;
+      height: 16px;
+    }
+  }
+
+  &:hover > a[role="anchor"],
+  & > a[role="anchor"]:focus-visible {
+    opacity: 1;
+  }
+
+  & > a[role="anchor"]:hover {
+    color: var(--ink);
+  }
+}
+
+@media all and ($mobile) {
+  article :is(h1, h2, h3, h4, h5, h6) > a[role="anchor"] {
+    display: none;
+  }
+}
+
+/* ---------- Выделение ==текст== : инверсия --------------------------------- */
+
+.text-highlight,
+mark {
+  background: var(--ink);
+  color: var(--canvas);
+  border-radius: 2px;
+  padding: 0 0.15em;
+  -webkit-box-decoration-break: clone;
+  box-decoration-break: clone;
+}

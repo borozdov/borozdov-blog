@@ -1,0 +1,94 @@
+@use "../variables.scss" as *;
+
+/* ---------- Главная: обычная заметка, заголовок и первый абзац крупно -------
+   index.md пишется в Obsidian как любая заметка: title — имя на главной,
+   первый абзац — подзаголовок. Разметки hero в самой заметке нет.
+   Правила привязаны к .center: попап с главной живёт в <body> и остаётся
+   обычной карточкой, а не копией огромного заголовка.
+   -------------------------------------------------------------------------- */
+
+/* Главная — вход, а не заметка: без даты и без «Ссылаются сюда» */
+[data-slug="index"] :is(.center .content-meta, .sidebar .backlinks) {
+  display: none;
+}
+
+[data-slug="index"] .center {
+  .page-header .article-title {
+    max-width: 9em;
+    margin: 2rem 0 1.5rem;
+    font-size: clamp(2.6rem, 9vw, 4.8rem);
+    font-weight: 700;
+    line-height: 0.95;
+    letter-spacing: -0.03em;
+  }
+
+  & > article {
+    padding-bottom: 3rem;
+    border-bottom: 1px solid var(--hairline);
+
+    & > p:first-of-type {
+      max-width: 34rem;
+      font-size: 1.1rem;
+      line-height: 1.6;
+      color: var(--soft);
+    }
+  }
+
+  .page-footer {
+    margin-top: 3rem;
+  }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  [data-slug="index"] .center > :is(.page-header, article) {
+    animation: b-rise 0.3s ease both;
+  }
+}
+
+/* ---------- 404 ------------------------------------------------------------ */
+
+[data-slug="404"] .center article {
+  padding: 3rem 0;
+
+  h1 {
+    font-family: var(--font-mono);
+    font-variant-numeric: tabular-nums;
+    font-size: clamp(4rem, 14vw, 7rem);
+    letter-spacing: -0.04em;
+    margin: 0 0 1rem;
+  }
+
+  p {
+    color: var(--slate);
+    text-transform: uppercase;
+    font-size: 0.75rem;
+    letter-spacing: 0.12em;
+  }
+}
+
+/* ---------- Комментарии из Telegram ----------------------------------------
+   Блок под статьёй за волосяной линией. Ярлык — как у виджетов, ссылка на
+   пост — запасной путь, если telegram.org не загрузился.
+   -------------------------------------------------------------------------- */
+
+.telegram-comments {
+  padding-top: 1.5rem;
+  border-top: 1px solid var(--hairline);
+}
+
+.telegram-comments__head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 1.25rem;
+}
+
+.page-footer a.telegram-comments__link {
+  font-size: 0.8rem;
+}
+
+.telegram-comments-widget iframe {
+  display: block;
+  max-width: 100%;
+}

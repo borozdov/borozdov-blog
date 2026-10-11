@@ -1,0 +1,198 @@
+@use "../variables.scss" as *;
+
+/* ---------- Списки заметок: главная, теги, папки ---------------------------
+   Строка — как строка таблицы: дата моно слева, название, теги справа,
+   разделитель hairline. Вся строка — ссылка (растянутая ::after названия),
+   ховер — подложка --hover на всю строку, название остаётся чернилами.
+   Теги лежат поверх растянутой ссылки и кликаются отдельно.
+   -------------------------------------------------------------------------- */
+
+.recent-notes > h3 {
+  margin-bottom: 0.9rem;
+}
+
+/* Список выступает на 0.75rem за колонку: текст строк стоит по краю колонки,
+   а подложка ховера получает поля */
+ul.section-ul,
+ul.recent-ul {
+  list-style: none;
+  margin: 0 -0.75rem;
+  padding: 0;
+  border-top: 1px solid var(--hairline);
+}
+
+li.section-li,
+li.recent-li {
+  margin: 0;
+  padding: 0;
+  border-bottom: 1px solid var(--hairline);
+
+  & > .section {
+    position: relative;
+    display: grid;
+    grid-template-columns: 7.5rem minmax(0, 1fr) auto;
+    align-items: baseline;
+    column-gap: 1.25rem;
+    padding: 1rem 0.75rem;
+    transition: background-color 0.15s ease;
+
+    & > .meta {
+      grid-column: 1;
+      grid-row: 1;
+      margin: 0;
+      opacity: 1;
+      white-space: nowrap;
+      text-transform: uppercase;
+    }
+
+    & > .desc {
+      grid-column: 2;
+      grid-row: 1;
+      min-width: 0;
+    }
+
+    & > .tags {
+      position: relative;
+      z-index: 1;
+      grid-column: 3;
+      grid-row: 1;
+      margin: 0;
+      justify-content: flex-end;
+    }
+
+    & > .desc > h3 {
+      /* Растянутая ссылка отсчитывается от строки, а не от заголовка */
+      position: static;
+      margin: 0;
+      font-size: 1rem;
+      letter-spacing: -0.01em;
+      line-height: 1.35;
+      text-transform: none;
+
+      & > a {
+        color: var(--ink);
+        font-weight: 600;
+        text-decoration: none;
+        background: none;
+        padding: 0;
+
+        /* Растянутая ссылка: вся строка ведёт на заметку */
+        &::after {
+          content: "";
+          position: absolute;
+          inset: 0;
+        }
+      }
+    }
+  }
+}
+
+/* Заметка без даты: колонка даты не оставляет дыру */
+li.section-li > .section > .meta:empty,
+li.recent-li > .section > .meta:empty {
+  display: none;
+}
+
+li.section-li > .section:is(:has(> .meta:empty), :not(:has(> .meta))),
+li.recent-li > .section:is(:has(> .meta:empty), :not(:has(> .meta))) {
+  grid-template-columns: minmax(0, 1fr) auto;
+
+  & > .desc {
+    grid-column: 1;
+  }
+
+  & > .tags {
+    grid-column: 2;
+  }
+}
+
+@media (hover: hover) {
+  li.section-li > .section:hover,
+  li.recent-li > .section:hover {
+    background: var(--hover);
+  }
+}
+
+li.section-li > .section:has(> .desc a:focus-visible),
+li.recent-li > .section:has(> .desc a:focus-visible) {
+  background: var(--hover);
+}
+
+/* Кольцо фокуса — на всю строку, а не на текст названия */
+li.section-li > .section > .desc > h3 > a:focus-visible,
+li.recent-li > .section > .desc > h3 > a:focus-visible {
+  box-shadow: none;
+
+  &::after {
+    box-shadow:
+      inset 0 0 0 1px var(--ink),
+      inset 0 0 0 4px var(--focus-ring);
+  }
+}
+
+@media (hover: none) {
+  li.section-li > .section:active,
+  li.recent-li > .section:active {
+    background: var(--hover);
+  }
+}
+
+@media all and ($mobile) {
+  li.section-li > .section,
+  li.recent-li > .section {
+    grid-template-columns: minmax(0, 1fr);
+    row-gap: 0.4rem;
+    padding: 0.9rem 0;
+
+    & > .meta {
+      grid-column: 1;
+      grid-row: 2;
+    }
+
+    & > .desc {
+      grid-column: 1;
+      grid-row: 1;
+    }
+
+    & > .tags {
+      display: flex;
+      grid-column: 1;
+      grid-row: 3;
+      justify-content: flex-start;
+    }
+  }
+
+  ul.section-ul,
+  ul.recent-ul {
+    margin: 0;
+  }
+
+  li.section-li > .section:is(:has(> .meta:empty), :not(:has(> .meta))),
+  li.recent-li > .section:is(:has(> .meta:empty), :not(:has(> .meta))) {
+    grid-template-columns: minmax(0, 1fr);
+
+    & > .tags {
+      grid-column: 1;
+      grid-row: 2;
+    }
+  }
+}
+
+.page-listing {
+  margin-top: 2rem;
+
+  & > p {
+    color: var(--slate);
+    text-transform: uppercase;
+    font-size: 0.66rem;
+    letter-spacing: 0.12em;
+    font-weight: 500;
+    margin: 0 0 0.9rem;
+  }
+}
+
+/* Указатель тегов (/tags): тег — заголовок группы */
+.popover-hint > div > div > h2:has(> a.tag-link) {
+  margin: 2.5rem 0 0.75rem;
+  font-size: 1rem;
+}

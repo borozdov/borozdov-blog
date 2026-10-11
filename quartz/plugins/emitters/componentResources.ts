@@ -323,10 +323,13 @@ export const ComponentResources: QuartzEmitterPlugin = () => {
       // that everyone else had the chance to register a listener for it
       addGlobalPageResources(ctx, componentResources)
 
+      // Стили компонентов Quartz — в нижнем каскадном слое `quartz` (туда же custom.scss
+      // кладёт base.scss). Бренд (custom.scss → styles/brand/) вне слоёв и поэтому
+      // сильнее любого дефолта Quartz при любой специфичности селектора.
       const stylesheet = joinStyles(
         ctx.cfg.configuration.theme,
         googleFontsStyleSheet,
-        ...componentResources.css,
+        `@layer quartz {\n${componentResources.css.join("\n\n")}\n}`,
         styles,
       )
 
